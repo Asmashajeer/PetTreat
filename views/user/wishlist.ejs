@@ -1,0 +1,96 @@
+<%-include("../partials/user/header.ejs") -%>
+
+
+    <style>
+        .wishlist-card {
+            transition: transform 0.2s;
+        }
+        .wishlist-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .product-img {
+            object-fit: cover;
+            height: 200px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Content -->
+    <div class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">My Wishlist</h2>
+            <span class="text-muted">(<span id="wishlist-count">2</span> items)</span>
+        </div>
+
+        <!-- Wishlist Items Container -->
+        <div class="wishlist-container">
+            <!-- Single Wishlist Item -->
+            <div class="card mb-3 wishlist-card">
+                <div class="row g-0">
+                    <div class="col-md-4 d-flex align-items-center justify-content-center">
+                        <img src="/api/placeholder/200/200" class="product-img rounded-start" alt="Product Image">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="card-title mb-1">Premium Dog Food</h5>
+                                    <p class="card-text mb-1">
+                                        <small class="text-muted">Brand: PawPerfect</small>
+                                    </p>
+                                    <p class="card-text mb-1">
+                                        <small class="text-muted">Category: Dog Food</small>
+                                    </p>
+                                    <p class="card-text mb-2">
+                                        <span class="badge bg-success">In Stock</span>
+                                        <small class="text-muted ms-2">15 items available</small>
+                                    </p>
+                                    <h4 class="text-primary mb-3">$29.99</h4>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-danger btn-sm" title="Remove from wishlist">
+                                        <i class="zmdi zmdi-close"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary">
+                                    <i class="zmdi zmdi-shopping-cart me-2"></i>
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty Wishlist Message (shown when no items) -->
+            <div class="text-center py-5 d-none">
+                <i class="zmdi zmdi-favorite-outline display-1 text-muted mb-3"></i>
+                <h3>Your wishlist is empty</h3>
+                <p class="text-muted">Browse our products and add your favorites to the wishlist!</p>
+                <a href="/shop" class="btn btn-primary">
+                    Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add to Cart Success Toast -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="addToCartToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="zmdi zmdi-check-circle text-success me-2"></i>
+                <strong class="me-auto">Success</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                Item added to cart successfully!
+            </div>
+        </div>
+    </div>
+
+
+<%-include("../partials/user/footer.ejs") -%>

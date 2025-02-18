@@ -1,0 +1,261 @@
+<%- include("../../views/partials/admin/header") %>
+
+    
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        <div class="row mb-4">
+            <div class="col">
+                <h4>Order Management</h4>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h6 class="card-title">Total Orders</h6>
+                        <h3 class="card-text"></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h6 class="card-title">Completed</h6>
+                        <h3 class="card-text"></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body">
+                        <h6 class="card-title">Pending</h6>
+                        <h3 class="card-text"></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h6 class="card-title">Cancelled</h6>
+                        <h3 class="card-text"></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <form action="/admin/orders/" method="get" class="d-inline">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" placeholder="Search orders...">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <button class="btn btn-success">
+                    <i class="fas fa-plus"></i> New Order
+                </button>
+                <button class="btn btn-secondary"  data-bs-toggle="modal" data-bs-target="#filterModal">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+            </div>
+            <!-- ----------filter -->
+            <div class="modal fade" id="filterModal" tabindex="-1">
+                <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Filter Orders</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="filterForm" action="/admin/orders" method="GET">
+                                <!-- Date Range -->
+                                <div class="filter-section d-flex align-items-center border-bottom justify-content-between mb-3">
+                                    <span class="mb-3">Date Range</span>                                    
+                                        <div class="col-md-4 w-25  d-flex align-items-center ">
+                                            <label class="form-label ">From  </label>
+                                            <input type="date" class="form-control" name="dateFrom" value="">
+                                        </div>
+                                        <div class="col-md-4 w-25 d-flex align-items-center ">
+                                            <label class="form-label m1-2">To </label>
+                                            <input type="date" class="form-control" name="dateTo" value="">
+                                        </div>                                  
+                                </div>
+                              <br>
+                                <!-- Order Status -->
+                                <div class="filter-section mb-1">
+                                    <h6 class="mb-3">Order Status</h6>
+                                    <div class="status-filters d-flex align-items-center justify-content-between m-0">
+                                        <div class="form-check d-flex ">
+                                            <input class="form-check-input" type="checkbox" name="status" value="Placed" id="statusPlaced">
+                                            <label class="form-check-label" for="statusPlaced">
+                                                Placed
+                                            </label>
+                                        </div>
+                                        <div class="form-check  d-flex">
+                                            <input class="form-check-input" type="checkbox" name="status" value="Processing" id="statusProcessing">
+                                            <label class="form-check-label" for="statusProcessing">
+                                                Processing
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="status" value="Shipped" id="statusCompleted">
+                                            <label class="form-check-label" for="statusShipped">
+                                               Shipped
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="status" value="Cancelled" id="statusCancelled">
+                                            <label class="form-check-label" for="statusCancelled">
+                                                Cancelled
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="status" value="CancelRequested" id="statusCancelRequested">
+                                            <label class="form-check-label" for="statusCancelRequested">
+                                                CancelRequested
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+                                <!-- Price Range -->
+                                <div class="filter-section  ">
+                                    <h6 class="mb-3 mt-2 ">Price Range</h6>
+                                    <div class="row ms-5 price-range">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Min Price</label>
+                                            <input type="number" class="form-control" name="minPrice" placeholder="0">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Max Price</label>
+                                            <input type="number" class="form-control" name="maxPrice" placeholder="0">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" onclick=" clearAll()" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" form="filterForm" class="btn btn-apply">
+                                        <i class="fas fa-check me-2"></i>Apply Filters
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+       <!-- -----------filter ends -->
+        <!-- Orders Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <%orders.forEach(order=>{%>
+                            <tr>
+                                <td><%=order.orderId%></td>
+                                <td><%=order.userId.name%></td>
+                                <td><%=new Date(order.createdOn).toISOString().split('T')[0]%></td>
+                                <td><span class="badge bg-secondary "><%=order.status%></span></td>
+                                <td><%=order.orderPrice%></td>
+                                <td>
+                                    <a  href="/admin/orders/EditOrderStatus/<%=order.orderId%>" class="btn btn-sm border "><i class="fas fa-edit text-success"></i></a>
+                                    <!-- <a href="/admin/orders/viewOrder/<%=order.orderId%>" class="btn btn-sm border "><i class="fas fa-eye"></i></a> -->
+                                    <!-- <a href="/admin/orders/cancelOrde/<%=order.orderId%>"  onclick="return confirm('Are you sure,Do you want  to cancel this Order ? ')" class="btn btn-sm border"><i class="fas fa-trash text-danger"></i></a> -->
+                                </td>
+                            </tr>
+                        <%})%>    
+                           
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <nav>                 
+                    <ul class="pagination justify-content-center">
+                            <%if (currentPage>1){%>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= currentPage-1 %>"  aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>                    
+                            <%}%>
+                             <%for(let i=1;i<=totalPages;i++){%> 
+                             
+                                <%if(i==currentPage){%>
+                                    <li class="page-item">   
+                                      <span  class="page-link " href=""><%= i %></span></a> 
+                                <%}else{%>
+                                    <li class="page-item" >
+                                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                                    </li>
+                            <%}}%>
+                            <%if (currentPage<totalPages){%>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= currentPage+1 %>" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            <% }%>       
+                     </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        document.getElementById('DOMContentLoaded',function(){
+            document.getElementById('dateFrom').value='';
+            document.getElementById('dateTo').value='';
+      
+            document.getElementById('filterForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                let queryParams = new URLSearchParams();
+                
+                // Add date range if specified
+                if(formData.get('dateFrom')) queryParams.append('dateFrom', formData.get('dateFrom'));
+                if(formData.get('dateTo')) queryParams.append('dateTo', formData.get('dateTo'));
+                
+                // Add selected statuses
+                const statuses = formData.getAll('status');
+                if(statuses.length) queryParams.append('status', statuses.join(','));
+                
+                // Add price range if specified
+                if(formData.get('minPrice')) queryParams.append('minPrice', formData.get('minPrice'));
+                if(formData.get('maxPrice')) queryParams.append('maxPrice', formData.get('maxPrice'));
+                
+
+                document.getElementById('dateFrom').value='';
+                document.getElementById('dateTo').value='';
+                // Redirect with filters
+                window.location.href = `/admin/orders?${queryParams.toString()}`;
+            });
+
+            function clearAll(){
+                document.getElementById('filterForm').reset();
+                return true;
+            }
+        });
+    </script>
+    <%- include("../../views/partials/admin/footer") %>

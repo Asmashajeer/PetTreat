@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body >
+  
+   <!-- breadcrumb -->
+    <section>
+        <div class="container m-b-50">
+            <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-60 p-lr-0-lg"style="position:relative;top:45px">
+                <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+                    Home
+                    <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+                </a>
+                <a href="/profile" class="stext-109 cl8 hov-cl1 trans-04">
+                    profile
+                    <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+                </a>
+                <a href="/profile#orders" class="stext-109 cl8 hov-cl1 trans-04">
+                    Orders
+                    <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+                </a>
+
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container mt-5 pt-3">
+        <!-- Header with Actions -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Order <%=order.orderId%></h3>
+            <div class="btn-group">
+                <!-- <button class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit Order
+                </button> -->
+                <button class="btn btn-success">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+
+        <!-- Order Status -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <h6 class="text-muted">Order Status</h6>
+                        <span class="badge bg-secondary  fs-6"><%=order.status%></span>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <h6 class="text-muted">Order Date</h6>
+                        <p class="mb-0"><%=new Date(order.createdOn).toLocaleDateString("en-GB")%></p>
+                    </div>
+                    <!-- <div class="col-md-3 mb-3">
+                        <h6 class="text-muted">Payment Status</h6>
+                        <span class="badge bg-success fs-6">Paid</span>
+                    </div> -->
+                    <div class="col-md-3 mb-3">
+                        <h6 class="text-muted">Payment Method</h6>
+                        <p class="mb-0">CashOn Delivery</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Customer Information -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Customer Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6><%=order.userId.name%></h6>
+                        <p class="mb-2">Email: <%=order.userId.email%></p>
+                        <p class="mb-2">Phone: <%=address.phone%></p>
+                        <hr>
+                        <!-- <h6>Billing Address</h6>
+                        <p class="mb-0">
+                            123 Main Street<br>
+                            Apt 4B<br>
+                            New York, NY 10001<br>
+                            United States
+                        </p> -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Shipping Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6><%=address.address%></h6>
+                        <p class="mb-3">
+                            <%=address.city%> <%=address.landmark%><br> <%=address.state%><br>
+                          <%=address.pincode%><br>
+                           
+                            
+                        </p>
+                        <hr>
+                        <!-- <h6>Shipping Method</h6>
+                        <p class="mb-2">Express Shipping</p>
+                        <p class="mb-0">Tracking Number: 1Z999AA1234567890</p> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Order Items</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>                           
+                                <tr>
+                                    <th>Product</th>
+                                    <th>product ID</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th class="text-end">Total</th>
+                                </tr>                                
+                        </thead>
+                        <tbody>
+                        <%order.orderItems.forEach(item=>{%>    
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="/uploads/re-image/<%=item.productImage%>" style=" width:15%" alt="Product" class="me-2">
+                                        <div>
+                                            <h6 class="mb-0"><%=item.productName%></h6>
+                                            <!-- <small class="text-muted">Black, 128GB</small> -->
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><%=item.product%></td>
+                                <td><%=item.price%></td>
+                                <td><%=item.quantity%></td>
+                                <td class="text-end"><%=item.subtotal%></td>
+                            </tr>   
+                        <%})%>    
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="text-end"><strong>Subtotal:</strong></td>
+                                <td class="text-end"><%=order.totalPrice%></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end"><strong>Delivery:</strong></td>
+                                <td class="text-end"><%=order.deliveryPrice%></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end"><strong>Discount:</strong></td>
+                                <td class="text-end"><%=order.discount%></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end"><strong>Total:</strong></td>
+                                <td class="text-end"><strong><%=order.orderPrice%></strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Timeline -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Order Timeline</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <!-- <div class="mb-3">
+                        <h6 class="mb-1">Order Delivered</h6>
+                        <small class="text-muted">February 12, 2025 - 2:30 PM</small>
+                        <p class="mb-0">Package was delivered to customer</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="mb-1">Out for Delivery</h6>
+                        <small class="text-muted">February 12, 2025 - 9:00 AM</small>
+                        <p class="mb-0">Package is out for delivery</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="mb-1">Order Shipped</h6>
+                        <small class="text-muted">February 9, 2025 - 10:00 AM</small>
+                        <p class="mb-0">Order has been shipped via Express Shipping</p>
+                    </div> -->
+                    <div>
+                        <h6 class="mb-1">Order Placed</h6>
+                        <small class="text-muted"><%=new Date(order.createdOn).toLocaleDateString("en-GB")%></small>
+                        <p class="mb-0">Order was placed by customer</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

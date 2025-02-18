@@ -1,0 +1,308 @@
+<%-include("../partials/user/header.ejs") -%>
+
+
+  <style>
+    .card-icon {
+      font-size: 2rem;
+      color: #007bff;
+    }
+    .nav-pills .nav-link.active {
+         background-color: #dead65 !important; /* Change to green */
+        color: white !important; /* White text */
+    }
+  </style>
+</head>
+<body>
+    <!-- breadcrumb -->
+	<section>
+		<div class="container m-b-70">
+			<div class="bread-crumb flex-w p-l-25 p-r-15 p-t-60 p-lr-0-lg"style="position:relative;top:45px">
+				<a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+					Home
+					<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+				</a>
+                <a href="/profile" class="stext-109 cl8 hov-cl1 trans-04">
+					profile
+					<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+				</a>
+				<span  class="stext-109 cl8 hov-cl1 trans-04">
+					Address
+					
+				</span>
+
+				
+			</div>
+		</div>
+	</section>
+
+    <div class="container mt-4">
+        <div class="row">
+          <!-- Vertical Nav (Left Side) -->
+          <div class="col-md-2 mb-5">
+            <ul class="nav nav-pills flex-column" id="v-pills-tab" role="tablist">
+               <li class="nav-item" role="presentation">
+                    <a class="nav-link " id="profile-tab" data-bs-toggle="pill" href="#profile" role="tab" aria-controls="profile" aria-selected="false">👤 Account</a>
+               </li>
+              <li class="nav-item" role="presentation">
+                <a class="nav-link " id="addresses-tab" data-bs-toggle="pill" href="#addresses" role="tab" aria-controls="addresses" aria-selected="false">🏠Addresses</a>
+              </li>
+              <li class="nav-item" role="presentation">
+                <a class="nav-link" id="security-tab" data-bs-toggle="pill" href="#security" role="tab" aria-controls="security" aria-selected="false">🔒 Login & Security</a>
+              </li>
+              <li class="nav-item" role="presentation">
+                <a class="nav-link" id="orders-tab" data-bs-toggle="pill" href="#orders" role="tab" aria-controls="orders" aria-selected="false">🔍Orders</a>
+              </li>
+              <li class="nav-item" role="presentation">
+                <a class="nav-link" id="wishlist-tab" data-bs-toggle="pill" href="#wishlist" role="tab" aria-controls="wishlist" aria-selected="false">💛Wishlist</a>
+              </li>
+            </ul>
+          </div>
+      
+          <!-- Tab Content (Right Side) -->
+          <div class="col-md-9">
+            <div class="tab-content" id="v-pills-tabContent">
+               <!-- profile Tab -->
+                <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                    <div class="card shadow text-center p-4" id="profileCard">
+
+                    <!--profile content-->                   
+                        <div class="row g-1 m-tb-2 ">  
+                           <div class="card-icon"><h1>👤</h1></div>
+                              <h5 class="card-title"><%=user.name%></h5>
+                              <p class="card-text"><%=user.email%></p>               
+                        </div>
+                        <div class="card justify-space-betweenp-3">
+                          <a href="/changeEmail">change Email</a>
+                            
+                          <a href="/changePassword">change Password</a>
+                        </div>
+                        <div class="card p-3">
+                          <a  class="text-danger" href="">Delete Account</a>
+                          
+                        </div>
+                    </div>
+                </div> 
+              <!-- Addresses Tab -->
+              <div class="tab-pane fade " id="addresses" role="tabpanel" aria-labelledby="addresses-tab">
+                <div class=" p-4 row d-flex " id="addressTab">
+                    <div class="d-flex justify-content-between mb-4">  
+                                
+                        <span><a href="/addAddress"  class=" btn  btn-primary float-right "><i class="bi bi-plus-circle"> Add New</i> </a> </span>
+                    </div>
+                    <%if(userAddress){%>
+                      <%userAddress.address.forEach((address)=>{%>
+                        <!-- <div class=""> -->
+                            <div class="card address-card shadow col-12 col-md-6 col-lg-5 default-address h-100 m-3">
+                                <div class="card-body d-flex flex-column">
+                                    <div class="d-flex justify-content-between bg-light align-items-start mb-3"> 
+                                        <span class="mb-1 badge bg-info"><%=address.addressType%></span>                                       
+                                        <!-- <span class="badge bg-success">Default</span> -->
+                                    </div>                        
+                                    <div class="mb-3">
+                                        <p class="mb-1">Name:&emsp;<small><%=address.name%></small></p>
+                                        <p class="mb-1">Address:&emsp; <small><%=address.address%></small></p>
+                                        <p class="mb-1">City: &emsp;<small><%=address.city%></small></p>
+                                        <p class="mb-1">Landmark: &emsp;<small><%=address.landmark%></small></p>
+                                        <p class="mb-1">State: &emsp;<small><%=address.state%></small></p>
+                                        <p class="mb-1">pincode: &emsp;<small><%=address.pincode%></small></p>
+                                        <p class="mb-0">Phone: &emsp;<small><%=address.phone%></small></p>
+                                        <p class="mb-0">Alternative Phone:<small><%=address.altPhone%></small></p>
+                                    </div>
+                                    <div class="mt-auto d-flex gap-2">
+                                        <span class="btn btn-sm btn-primary text-end"><a href="/editAddress?id=<%=address._id%>">Edit</a></span>
+                                        <span class="btn btn-sm btn-outline-danger"><a href="/deleteAddress?id=<%=address._id%>" onclick="return confirm('Are you sure to delete?')">Remove</a></span>
+                                    </div>                       
+                                </div>
+                            </div>                     
+                        <!-- /</div> -->
+                       <%})%> 
+                    <%}%>    
+                </div>
+              </div>
+      
+              <!-- Security Tab -->
+              <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+                <div class="card p-4">
+                  <h5 class="card-title">Login & Security</h5>
+                  <p class="card-text">Manage your password, email, and mobile number.</p>
+                </div>
+              </div>
+      
+              <!-- Orders Tab -->         
+              
+              <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">               
+                <body class="bg-light">
+                    <div class="container py-4">
+                        <h3 class="mb-4">My Orders</h3>
+                
+                      <form method="GET" action="/orders">  <!-- Filters -->
+                        <!-- <div class="row mb-4">
+                            <div class="col-md-3">
+                                <select class="form-select">
+                                    <option>All Orders</option>
+                                    <option>Last 30 days</option>
+                                    <option>Last 6 months</option>
+                                    <option>2024</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select">
+                                    <option>All Status</option>
+                                    <option>Delivered</option>
+                                    <option>Processing</option>
+                                    <option>Shipped</option>
+                                    <option>Cancelled</option>
+                                </select>
+                            </div>
+                        </div> -->
+                      
+                        <!-- Orders Table -->
+                        <div class="card ">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Order ID</th>
+                                                <th style="width: 200px;">Date</th>
+                                                <th>Status</th>
+                                                <th>Items</th>
+                                                <th>Total</th>
+                                                <th style="width: 200px;">Actions</th>
+                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                          <%if(orders){%>
+                                            <%orders.forEach(order=>{%>
+                                              <tr>
+                                                  <td><%=order.orderId%></td>
+                                                  <td><%=new Date(order.createdOn).toISOString().split('T')[0]%></td>
+                                                  <td><span class="badge bg-secondary d-inline-block" style="white-space: pre-wrap;"><%=order.status%></span></td>
+                                                   <td><%=order.orderItems.length%></td>
+                                                  <td><%=order.orderPrice%></td>
+                                                  <td>
+                                                       <a href="/orders/trackorder/<%=order.orderId%>" class="btn btn-outline-secondary btn-sm">Track</a>
+                                                      <a href="/orders/detailedOrderView/<%=order.orderId%>" class="btn btn-outline-secondary btn-sm">Details</a>
+                                                     <% if(order.status!=='Cancelled' && order.status!=='Delivered'){%>
+                                                        <a href="/orders/cancelRequest/<%=order.orderId%>" onclick="return confirmation('Are you sure ,you want to Cancel Order?')" class="btn btn-outline-secondary btn-sm">Cancel</a>
+                                                      <%}%>
+                                                  </td>
+                                              </tr>
+                                            <%})%>
+                                          <%}%>  
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                
+                        
+                    </div>
+                
+                    
+
+                  <!-- <div class="card p-4">
+                    <h5 class="card-title">Your Orders</h5>
+                    <p class="card-text">Track, return, cancel an order, download an invoice, or buy again.</p>
+                  </div> -->
+              </div>
+      
+              <!-- Wishlist Tab -->
+              <div class="tab-pane fade" id="wishlist" role="tabpanel" aria-labelledby="wishlist-tab">
+                <div class="container my-5">
+                <% if (wishlist) { %>	
+                  <div class="d-flex justify-content-between align-items-center mb-4">
+                      <h2 class="mb-0">My Wishlist</h2>
+                      <span class="text-muted">(<span id="wishlist-count"><%=wishlist.products.length%></span> items)</span>
+                  </div>
+          
+                  <!-- Wishlist Items Container -->
+                  <div class="wishlist-container">
+                    <%wishlist.products.forEach(product=>{%>	
+                      <!-- Single Wishlist Item -->
+                      <div class="card mb-3 wishlist-card">
+                          <div class="row g-0">
+                              <div class="col-md-4 d-flex align-items-center justify-content-center how-itemcart1">
+                                <img src="uploads/re-image/<%=product.productId.productImages[0]%>"  class="product-img rounded-start" alt="Product Image">
+                              </div>
+                              <div class="col-md-8">
+                                  <div class="card-body">
+                                      <div class="d-flex justify-content-between align-items-start">
+                                          <div>
+                                              <h6 class="card-title mb-1"><%=product.productId.productName%></h6>
+                                              <p class="card-text mb-1">
+                                                  <small class="text-muted">Brand: <%=product.productId.brand%></small>
+                                              </p>
+                                              <p class="card-text mb-1">
+                                                  <small class="text-muted">Category: <%=product.productId.category.name%></small>
+                                              </p>
+                                              <%if(product.productId.quantity>0){%>
+                                                <p class="card-text mb-2">
+                                                    <span class="badge bg-success">In Stock</span>
+                                                    <small class="text-muted ms-2"><%=product.productId.quantity%> items available</small>
+                                                </p>
+                                              <%}else{%>
+                                                <p class="card-text mb-2">
+                                                  <span class="badge bg-danger">outOf Stock</span>                                                 
+                                                </p>
+                                              <%}%>  
+                                              <h4 class="text-primary mb-3"><%=product.productId.regularPrice.toFixed(2)%></h4>
+                                          </div>
+                                          <div class="d-flex gap-2">
+                                              <a  href='/removeFromWishlist/<%=product.productId._i%>' class="btn btn-danger btn-sm" title="Remove from wishlist">
+                                                  <i class="zmdi zmdi-close"></i>
+                                              </a>
+                                          </div>
+                                      </div>
+                                      <div class="d-flex gap-2">
+                                          <button class="btn btn-primary">
+                                              <i class="zmdi zmdi-shopping-cart me-2"></i>
+                                              Add to Cart
+                                          </button>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                    <%})%>  
+                 </div>
+                <%}else{%> 
+                <!-- Empty Wishlist Message (shown when no items) -->
+                    <div class="text-center py-5 ">
+                    <i class="zmdi zmdi-favorite-outline display-1 text-muted mb-3"></i>
+                    <h3>Your wishlist is empty</h3>
+                    <p class="text-muted">Browse our products and add your favorites to the wishlist!</p>
+                    <a href="/shop" class="btn btn-primary">
+                        Continue Shopping
+                    </a>
+                  </div>
+                <%}%>  
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectedTab = "<%= selectedTab %>";
+            if (selectedTab) {
+                const tabElement = document.querySelector(`#${selectedTab}-tab`);
+                const tabPane = document.querySelector(`#${selectedTab}`);        
+                if (tabElement && tabPane) {
+                    // Remove 'active' class from all tab elements and tab panes
+                    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+                    document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('show', 'active'));
+                    
+                    // Add 'active' class to the selected tab and its pane
+                    tabElement.classList.add('active');
+                    tabPane.classList.add('show', 'active');
+                }
+            }
+        });
+    </script>
+
+
+
+
+<%-include("../partials/user/footer.ejs") -%>

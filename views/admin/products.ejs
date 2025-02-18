@@ -1,0 +1,131 @@
+<%- include("../../views/partials/admin/header") %>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons for delete/edit -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        .table thead th {
+            text-align: center;
+        }
+
+        .table tbody td {
+            text-align: center;
+        }
+
+        .pagination {
+            justify-content: center;
+        }
+
+        .action-btns button {
+            margin: 0 5px;
+        }
+       .btn-style{
+            width:fit-content;
+            padding:0;
+       }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h3 class="text-center mb-4">All Products</h3>
+
+        <!-- Add Product Button and Search Bar -->
+        <div class="d-flex justify-content-between mb-4">
+            <div>
+                <form action="" method="get" class="d-inline">
+                    <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px;">
+                        <input type="text" class="form-control border-0 rounded-pill" placeholder="Search products or brands" name="search">
+                        <button class="btn  border-0" type="submit">Search</button>
+                    </div>
+                </form>
+            
+                <!-- <input type="text" class="form-control" id="search" placeholder="Search by Product Name..." style="width: 300px;"> -->
+            </div>
+            <div>
+                <button class="btn btn-outline-success " style="color:#101110" onclick="window.location.href='/admin/addProduct'">
+                    <i class="fas fa-plus-circle"></i> Add Product
+                </button>
+            </div>
+            
+        </div>
+
+        <!-- Product Table -->
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Brand</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>In Stock</th>
+                    <th>blocked/<br>listed</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="product-list">
+                <!-- Dynamically populated rows will go here -->
+                <%data.forEach((product,index)=>{%>
+                <tr>
+                    <td><%=product.productName%></product></td>
+                    <td><%=product.brand%></td>
+                    <td><%=product.category.name%></td>
+                    <td><%=product.regularPrice%></td>
+                     <td><%=product.status%></td>
+                    <td><%=product.stock%></td>
+                    <td class="action-btns">    
+                        <%if(product.isBlocked===true){%>   
+                            <span class="badge rounded-pill alert-danger" style="width: 60px;color:rgb(119, 116, 116)">blocked</span>
+                            <a class="btn btn-success " href="/admin/unblockProduct?id=<%= product._id %>"><i class="fas fa-check-circle" title="UnBlock this product"></i></a>                             
+                        <%}else{%>
+                          <span class="badge rounded-pill alert-success" style="width: 60px;color:rgb(108, 106, 106) ">listed</span>
+
+                            <a class="btn btn-warning " href="/admin/blockProduct?id=<%= product._id %>" ><i class="fas fa-ban" style="color: #0f0f0e;" title="Block this product"></i></a> 
+                     
+                         <%}%> 
+                    </td> 
+                    <td>    
+                        <a class="btn" href="/admin/editProduct?id=<%= product._id %>"><i class="fas fa-edit" style="color: #069c3a;" title="Edit this product"></i> </a>
+                    </td>  
+                    
+                </tr>
+               <%})%>
+                <!-- Add more product rows dynamically -->
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <nav>
+            <ul class="pagination">
+                <%if (currentPage>1){%>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage-1 %>"  aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>                    
+                <%}%>
+                 <%for(let i=1;i<=totalPages;i++){%> 
+                 
+                    <%if(i==currentPage){%>
+                        <li class="page-item">   
+                          <span  class="page-link " href=""><%= i %></span></a> 
+                    <%}else{%>
+                        <li class="page-item" >
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                <%}}%>
+                <%if (currentPage<totalPages){%>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage+1 %>" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                <% }%>       
+            </ul>
+        </nav>
+    </div>
+
+  
+    </script>
+    <%- include("../../views/partials/admin/footer") %>
