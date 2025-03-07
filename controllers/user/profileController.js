@@ -3,7 +3,9 @@ const User= require('../../models/userSchema');
 const Address= require('../../models/addressSchema');
 const Order= require('../../models/orderSchema');
 const Wishlist= require('../../models/wishlistSchema');
+const Wallet = require('../../models/walletSchema');
 const bcrypt= require('bcrypt');
+const moment =require('moment');
 
 const { generateOtp,
     sendVerificationEmail,
@@ -95,17 +97,42 @@ const userProfile= async(req,res)=>{
     
     const userid=req.query.id;
     const id=req.session.user;
-    const userData=await User.findById({_id:id});    
+    const userData=await User.findById({_id:id});  
+    let referralCode= "";
     if(userData){
        const addressData= await Address.findOne({userId:userData._id});  //---Addresses 
-        const orderData= await Order.find({userId:userData._id}).sort({createdOn:-1});  //---orders
+       let page=1;
+            if(req.query.page){
+                page=req.query.page;            
+            }
+            let limit=5;
+            let count=0;  
+        const order= await Order.find({userId:userData._id}) .sort({createdOn:-1})
+                             .limit(limit*1)
+                             .skip((page-1)*limit)
+                             .exec();  //---orders 
+                          
+         count=await Order.find({userId:userData._id}).countDocuments();   
+         const orderData={
+            orders:order,
+            totalPages:Math.ceil(count/limit),
+            currentPage:page,
+
+         }  
+        
         const wishlist= await Wishlist.findOne({userId:userData._id}) 
         .populate({
             path: 'products.productId',
             populate: {
                 path: 'category'            }
         });//---wishlist
-       res.render('profile',{user:userData,selectedTab,userAddress:addressData,orders:orderData,wishlist:wishlist});      
+        const wallet=await Wallet.findOne({userId:userData._id}); 
+        console.log(wallet);
+        if(userData.referralCode){
+          referralCode= userData.referralCode;
+         }
+           
+       res.render('profile',{user:userData,selectedTab,userAddress:addressData,orderData:orderData,wishlist:wishlist,wallet:wallet,moment,referralCode});      
     }else{
        console.error("unable to fetch user data");
     }
@@ -450,6 +477,20 @@ const updatePassword =async (req,res)=>{
 
 }
 
+// ------------generate referal code---------------
+const generateReferalCode= async(req,res)=>{
+    let refCode=req.params.refCode;    
+    const userId=req.session.user;
+    const user = await User.findById({_id:userId});
+    if(user.referralCode){
+        console.log(user.referralCode);
+        refCode=user.referralCode;
+    }else{
+        await User.updateOne({_id:userId},{$set:{referralCode:refCode}});
+    }   
+    return res.status(200).json({succes:true,referralCode:refCode});
+    
+}
 module.exports={
     forgotPassword,
     verifyEmailResetPassword,
@@ -470,6 +511,8 @@ module.exports={
     resendOtp,
     verifyEmail,
     changePasswordPage,
-    updatePassword
+    updatePassword,
+    
+    generateReferalCode
 
 }

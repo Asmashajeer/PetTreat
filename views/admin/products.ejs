@@ -3,6 +3,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons for delete/edit -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css"/>
     <style>
         .table thead th {
             text-align: center;
@@ -57,7 +58,10 @@
                     <th>Product Name</th>
                     <th>Brand</th>
                     <th>Category</th>
-                    <th>Price</th>
+                    <th>RegularPrice</th>
+                    <th>SalePrice</th>
+                    <th>OfferPrice</th>
+                    <th>Offer</th>
                     <th>Status</th>
                     <th>In Stock</th>
                     <th>blocked/<br>listed</th>
@@ -72,9 +76,19 @@
                     <td><%=product.brand%></td>
                     <td><%=product.category.name%></td>
                     <td><%=product.regularPrice%></td>
+                    <td><%=product.salePrice%></td>
+                   <td><%=product.productOffer%>%</td>
+                   <td>
+                    <%if(product.productOffer===0){%>
+                        <a  href="#" onclick="addOffer('<%=product._id%>')" class="btn  btn-sm btn-outline-success " style="width: 70px">AddOffer</a>
+                    <%}else{%>
+                        <a  href="#" onclick="removeOffer('<%=product._id%>')" class="btn btn-sm btn-outline-danger " style="width: 70px">Remove</a>
+                    <%}%>
+                   </td>
                      <td><%=product.status%></td>
                     <td><%=product.stock%></td>
-                    <td class="action-btns">    
+                    <td class="action-btns">   
+                   
                         <%if(product.isBlocked===true){%>   
                             <span class="badge rounded-pill alert-danger" style="width: 60px;color:rgb(119, 116, 116)">blocked</span>
                             <a class="btn btn-success " href="/admin/unblockProduct?id=<%= product._id %>"><i class="fas fa-check-circle" title="UnBlock this product"></i></a>                             
@@ -126,6 +140,84 @@
         </nav>
     </div>
 
-  
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+    <script>
+
+          //-------addOffer-------------
+    async function addOffer(productId){
+      const {value:amount}=await Swal.fire({
+        title:'Offer in Percentage',
+        input:'number',
+        inputLabel:'Percentage',
+        inputPlaceholder:'%',
+      });
+      if(amount){
+        const response= await fetch('/admin/addProductOffer',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            percentage:amount,
+            productId:productId
+          }),
+        })
+        .then(response=>response.json())
+        .then(data=>{
+          if(data.status===true){
+                Swal.fire("Offer Added",
+                'Offer hasbeen Added',
+                'success'
+            ).then(()=>{
+              location.reload();               
+            })
+          }else{
+            Swal.fire("Failed",data.message||'Adding Offer failed','error');
+          }
+        }).catch((error)=>{
+            Swal.fire("error",'error occured','error');
+            console.log("error adding offer:",error);
+            });
+      }
+
+    }
+
+//------remove Offer------------------
+    async function removeOffer(productId){    
+        const result=Swal.fire({
+            title:'Remove Offer',
+            text:'Are you sure you want to remove this Offer',
+            icon:'warning',
+            showCancelButton:true,
+            confirmButtonColor:'grey' ,
+            cancelButtonColor:'d33',
+            confirmButtonText:'yes',
+        }).then(async(result)=>{
+              
+            if(result.isConfirmed){  
+                console.log(result);       
+                const response= await fetch('/admin/removeProductOffer',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({productId:productId}),
+                })
+                .then(response=>response.json())
+                .then(data=>{
+                    console.log('removing offer.......');
+                    if(data.status===true){
+                        Swal.fire("Offer removed",
+                            'Offer hasbeen removed',
+                            'success'
+                        ).then(()=>{
+                            location.reload();               
+                            })
+                    }else{
+                        Swal.fire("Failed",
+                            data.message||'Removing Offer failed',
+                            'error')
+                    }
+                }).catch((error)=>{Swal.fire("error",'error occured','error')});
+            }
+        })      
+    }
+
     </script>
     <%- include("../../views/partials/admin/footer") %>

@@ -5,12 +5,19 @@ const  Coupon = require('../../models/couponSchema');
 //----------------show coupons-----------------
 const loadCoupon = async(req,res)=>{
     try {
-        
-        const allCoupons= await Coupon.find({});
-        return res.render('coupons',{coupons:allCoupons}); 
+        const page= req.query.page || 1;                      
+        const limit=4;
+        const skip=(page-1)*limit;
+        const allCoupons= await Coupon.find({}).skip(skip).limit(limit*1).exec(); 
+        console.log(allCoupons);
+        const count= await Coupon.find({}).countDocuments();  
+        console.log(count);
+        const totalPages=Math.ceil(count/limit); 
+        return res.render('coupons',{coupons:allCoupons,currentPage:page,totalProducts:count,totalPages:totalPages});
         
     } catch (error) {
-        return res.redirect('/pageError');
+        console.log(error);
+        return res.redirect('/admin/pageError');
     }
    
 }
@@ -19,8 +26,8 @@ const loadCoupon = async(req,res)=>{
 const createCoupon =async(req,res)=>{
     try {
      
-        const {couponCode,createdOn,expireOn,discountValue,minimumPrice}=req.body;
-        console.log(couponCode,createdOn,expireOn,discountValue,minimumPrice);
+        const {couponCode,startOn,expireOn,discountValue,minimumPrice}=req.body;
+        console.log(couponCode,startOn,expireOn,discountValue,minimumPrice);
         const allCoupons= await Coupon.find({});
         const cCode =couponCode.toUpperCase();
         const existingCoupon = await Coupon.findOne({ couponCode:cCode });
@@ -29,11 +36,11 @@ const createCoupon =async(req,res)=>{
             return res.status(400).render('coupons',{coupons:allCoupons ,message: "Coupon code already exists" });
         }
         
-        const createdDate = new Date(createdOn);
+        const startDate = new Date(startOn);
         const expireDate = new Date(expireOn);
         const newCoupon =new Coupon({                            
             couponCode:cCode,
-            createdOn:createdDate,
+            startOn:startDate,
             expireOn:expireDate,
             discountValue,
             minimumPrice
@@ -74,9 +81,9 @@ const updateCoupon= async(req,res)=>{
     try {
         const id= req.params.id;
         console.log(id);
-        const {couponCode,createdOn,expireOn,discountValue,minimumPrice}=req.body;
+        const {couponCode,startOn,expireOn,discountValue,minimumPrice}=req.body;
         let cCode=couponCode.toUpperCase();
-        const createdDate = new Date(createdOn);
+        const startDate = new Date(startOn);
         const expireDate = new Date(expireOn);
         const existingCoupon= await Coupon.findOne({couponCode:cCode});
         if(existingCoupon){
@@ -84,7 +91,7 @@ const updateCoupon= async(req,res)=>{
         }
        const updatedCoupon= await Coupon.findByIdAndUpdate(id,
             {couponCode:cCode,
-            createdOn:createdDate,
+            startOn:startDate,
             expireOn:expireDate,
             discountValue,
             minimumPrice},{new:true});

@@ -34,43 +34,43 @@
     <!-- Main Content -->
     <div class="container mt-5 pt-3">
         <!-- Header with Actions -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4 col-md-10">
             <h3>Order <%=order.orderId%></h3>
             <div class="btn-group">
-                <!-- <button class="btn btn-primary">
-                    <i class="fas fa-edit"></i> Edit Order
-                </button> -->
-                <button class="btn btn-success">
-                    <i class="fas fa-print"></i> Print
+                <button  onclick="getInvoice('<%=order.orderId%>')" class="btn btn-primary" on >
+                    <i class="fas fa-file-invoice"></i> Invoice
                 </button>
+                <!-- <button class="btn btn-success">
+                    <i class="fas fa-print"></i> Print
+                </button> -->
             </div>
         </div>
 
         <!-- Order Status -->
-        <div class="card mb-4">
-            <div class="card-body">
+        <div class="card mb-4 col-md-10">
+            <div class="card-body ">
                 <div class="row">
                     <div class="col-md-3 mb-3">
-                        <h6 class="text-muted">Order Status</h6>
-                        <span class="badge bg-secondary  fs-6"><%=order.status%></span>
+                        <h6 class="text-muted">Order Status</h6>                       
+                        <span id="orderstatus" class="badge bg-secondary  fs-6"><%=order.status%></span>
                     </div>
                     <div class="col-md-3 mb-3">
                         <h6 class="text-muted">Order Date</h6>
                         <p class="mb-0"><%=new Date(order.createdOn).toLocaleDateString("en-GB")%></p>
                     </div>
-                    <!-- <div class="col-md-3 mb-3">
+                    <div class="col-md-3 mb-3">
                         <h6 class="text-muted">Payment Status</h6>
-                        <span class="badge bg-success fs-6">Paid</span>
-                    </div> -->
+                        <span class="badge bg-success fs-6"><%=order.paymentStatus%></span>
+                    </div>
                     <div class="col-md-3 mb-3">
                         <h6 class="text-muted">Payment Method</h6>
-                        <p class="mb-0">CashOn Delivery</p>
+                        <p class="mb-0"><%=order.paymentMethod%></p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row">
+        <div class="row col-md-10 ">
             <!-- Customer Information -->
             <div class="col-md-6 mb-4">
                 <div class="card h-100">
@@ -117,13 +117,13 @@
         </div>
 
         <!-- Order Items -->
-        <div class="card mb-4">
+        <div class="col-md-10 card mb-4">
             <div class="card-header">
                 <h5 class="card-title mb-0">Order Items</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="tableData">
                         <thead>                           
                                 <tr>
                                     <th>Product</th>
@@ -133,7 +133,7 @@
                                     <th class="text-end">Total</th>
                                 </tr>                                
                         </thead>
-                        <tbody>
+                        <tbody id="orderItems">
                         <%order.orderItems.forEach(item=>{%>    
                             <tr>
                                 <td>
@@ -149,10 +149,24 @@
                                 <td><%=item.price%></td>
                                 <td><%=item.quantity%></td>
                                 <td class="text-end"><%=item.subtotal%></td>
+                                <% if(order.status!=='Cancelled' && order.status!=='Delivered' && item.returnStatus!=='Return Request' && item.returnStatus!=='Return Approved' && item.returnStatus!=='Return Rejected'){%>
+                                    <%if(order.orderItems.length<2){%>
+                                        <td><a href="/orders/cancelOrder/<%=order.orderId%>" onclick="return confirmation('Are you sure ,you want to Cancel Order?')" class="btn btn-outline-danger btn-sm">Cancel</a></td>
+                                    <%}else{%>
+                                        <td><a href="#" onclick="cancelAnItem(event,'<%=order.orderId%>', '<%=item.product%>', '<%=item.productName%>','<%=item.quantity%>','<%=item.price%>')" class="btn btn-sm btn-outline-danger">Cancel</a> </td>
+                                    <%}%> 
+                                <%}else if(order.status==='Delivered' && item.returnStatus!=='Return Request'&& item.returnStatus!=='Returned'){%>                                          
+                                        <td><a href="#" onclick="returnAnItemForm(event,'<%=order.orderId%>', '<%=item.product%>', '<%=item.productName%>','<%=item.quantity%>','<%=item.price%>')" class="btn btn-sm btn-outline-info">Return</a></td>                                     
+                                <%}else if(item.returnStatus==='Return Request'){%> 
+                                    <td> <span class="badge bg-warning text-dark">Return Requested</span></td>
+                                <%}else{%>
+                                    <td><span class="badge bg-success text-white">Returned</span></td>
+                                <%}%>
+
                             </tr>   
                         <%})%>    
                         </tbody>
-                        <tfoot>
+                        <tfoot id="tfoot">
                             <tr>
                                 <td colspan="4" class="text-end"><strong>Subtotal:</strong></td>
                                 <td class="text-end"><%=order.totalPrice%></td>
@@ -176,7 +190,7 @@
         </div>
 
         <!-- Order Timeline -->
-        <div class="card mb-4">
+        <div class="card mb-4 col-md-10">
             <div class="card-header">
                 <h5 class="card-title mb-0">Order Timeline</h5>
             </div>
@@ -208,5 +222,150 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+       async function cancelAnItem(event,orderId,cancelledProductId,cancelledQuantity,cancelledPrice){
+            event.preventDefault();
+            console.log('--------------------');
+            try{
+                const response=await fetch('/order/cancelAnItem',{
+                    method:'PUT',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({orderId,cancelledProductId,cancelledQuantity,cancelledPrice})
+                });
+                const data=await response.json();
+                console.log(data.order.orderItems);
+                updateOrderDetails(orderId,data.order);
+
+            }catch(error){
+                console.log("Cannot cancel this item",error);
+            }
+       }
+      function  returnAnItemForm(event,orderId,productId,productName,quantity,price){
+            event.preventDefault();
+            window.location.href = `/orders/returnAnItemRequest/${orderId}/${productId}/${productName}/${quantity}/${price}`;           
+        }
+
+        async function returnAnItem(event,orderId,returnProductId,returnQuantity,returnPrice){
+            
+            event.preventDefault();
+
+            console.log('--------------------');
+            try{
+                const response=await fetch('/order/returnAnItem',{
+                    method:'PUT',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({orderId,returnProductId,returnQuantity,returnPrice})
+                });
+                const data=await response.json();
+                console.log(data.order.orderItems);
+                updateOrderDetails(orderId,data.order);
+
+            }catch(error){
+                console.log("Cannot returnl this item",error);
+            }
+        }
+
+        async function returnAnOrder(event,orderId){
+            try{
+                const response=await fetch('/order/returnAnOrder',{
+                    method:'PUT',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({orderId})
+                });
+                const data=await response.json();
+
+                console.log(data.order.orderItems);
+                
+
+            }catch(error){
+                console.log("Cannot returnl this item",error);
+            }
+        }
+
+       function  updateOrderDetails(orderId,order){
+        console.log("Order Data:", order);
+        console.log("Order Items:", order?.orderItems);
+        const tbody= document.getElementById('orderItems');
+        const tfoot= document.getElementById('tfoot');
+         const tableData= document.getElementById('tableData');
+        
+        tbody.innerHTML='';
+        order.orderItems.forEach(item => {
+            const tr = document.createElement('tr');
+
+            let actionButton = ""; // Store dynamic button content
+            if (order.status !== "Cancelled" && order.status !== "Delivered") {
+                if (order.orderItems.length < 2) {
+                    actionButton = `<td>
+                        <a href="/orders/cancelOrder/${order.orderId}" 
+                        onclick="return confirmation('Are you sure you want to Cancel Order?')" 
+                        class="btn btn-outline-danger btn-sm">Cancel</a>
+                    </td>`;
+                } else {
+                    actionButton = `<td>
+                        <a href="#" onclick="cancelAnItem(event, '${order.orderId}', '${item.product}', '${item.quantity}', '${item.price}')"
+                        class="btn btn-sm btn-outline-danger">Cancel</a>
+                    </td>`;
+                }
+            } else if (order.status === "Delivered") {
+                actionButton = `<td>
+                    <a href="#" onclick="returnAnItem(event, '${order.orderId}', '${item.product}', '${item.quantity}', '${item.price}')"
+                    class="btn btn-sm btn-outline-info">Return</a>
+                </td>`;
+            }
+
+                tr.innerHTML=`                             
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="/uploads/re-image/${item.productImage}" style=" width:15%" alt="Product" class="me-2">
+                                        <div>
+                                            <h6 class="mb-0">${item.productName}</h6>
+                                            <!-- <small class="text-muted">Black, 128GB</small> -->
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>${item.product}</td>
+                                <td>${item.price}</td>
+                                <td>${item.quantity}</td>
+                                <td class="text-end">${item.subtotal}</td>
+                                ${actionButton}  `;
+                            tbody.appendChild(tr);   
+
+                        });
+                        tfoot.innerHTML="";
+                        tfoot.innerHTML=`
+                            <tr>
+                                <td colspan="4" class="text-end"><strong>Subtotal:</strong></td>
+                                <td class="text-end">${order.totalPrice}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end"><strong>Delivery:</strong></td>
+                                <td class="text-end">${order.deliveryPrice}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end"><strong>Discount:</strong></td>
+                                <td class="text-end">${order.discount}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end"><strong>Total:</strong></td>
+                                <td class="text-end"><strong>${order.orderPrice}</strong></td>
+                            </tr>`;
+                            tableData.appendChild(tfoot);
+       }
+
+
+
+
+       //------------------get Invoice------------------
+       function getInvoice(orderId){
+        window.location.href = `/order/invoice/${orderId}`;
+
+    //     fetch(''/order/invoice'',{
+    //         method:'GET',
+    //         headers:{'Content-Type' :'application/json'},
+    //         body:JSON.stringify({orderId})
+    //    }).
+       }
+    </script>
 </body>
 </html>

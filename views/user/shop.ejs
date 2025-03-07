@@ -142,10 +142,14 @@
 
 			<div id='productGrid' class="row isotope-grid">
 				<% products.forEach(product=>{%>
+
 					<div  class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item <%=product.category=".*"%>>">
 						<!-- Block2 -->
 						<div class="block2">
 							<div class="block2-pic hov-img0">
+								<%if(product.productOffer>0){%>
+									<span class="badge rounded-pill bg-danger  ">Offer</span>
+								<%}%>	
 								<img src="/uploads/re-image/<%=product.productImages[0]%>" alt="IMG-PRODUCT">								
 							</div>
 
@@ -155,7 +159,13 @@
 										<%=product.productName%>
 									</a>
 									<span class="stext-105 cl3">
-										<%=product.regularPrice.toFixed(2)%>
+										<%if(product.productOffer>0){%>
+											<s><%=product.regularPrice.toFixed(2)%></s>
+											<span class="text-danger"><%=product.salePrice.toFixed(2)%></span>											
+											<span class="badge rounded-pill bg-danger  ">Offer</span>
+										<%}else{%>
+											<%=product.salePrice.toFixed(2)%>
+										<%}%>	
 									</span>								
 								</div>
 
@@ -199,11 +209,14 @@
 										// Set the innerHTML property with template literals
 										productCard.innerHTML = `
 											<div class="block2-pic hov-img0">
+												${product.productOffer > 0 ? '<span class="badge rounded-pill bg-danger">Offer</span>' : ''}
 												<img src="/uploads/re-image/${product.productImages[0]}" alt="${product.productName}" />
 											</div>
 											<div class="block2-txt flex-w flex-t p-t-14">
 												<a href="/productDetails?id=${product._id}" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">${product.productName}</a>
-												<br><span class="stext-105 cl3">$${product.regularPrice}</span>
+												${product.productOffer > 0 
+      											? `<s>${product.regularPrice.toFixed(2)} </s> <span class="text-danger">${product.salePrice.toFixed(2)}</span> <span class="badge rounded-pill bg-danger">Offer</span>` 
+     											 : `${product.salePrice.toFixed(2)}`}
 											</div>	`;									
 										productGrid.appendChild(productCard);
 								})	

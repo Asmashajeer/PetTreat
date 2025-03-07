@@ -33,10 +33,16 @@ const userSchema = new Schema({
         type:Boolean,
         default:0
     }, 
+    referralCode: { // Unique code for each user
+        type: String,
+         unique: true,
+         sparse:true
+    },    
     usedCoupons: [{ 
         type: String,
          default:null
-     }],   
+     }], 
+    
     createdOn:{
         type:Date,
         default:Date.now

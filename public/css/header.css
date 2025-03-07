@@ -36,7 +36,7 @@ h3{
   font-family: comic sans Ms;
 }
 input placeholder{
-  color:#6d6a6a
+  color:#868484
 }
 .text-primary{
   color: #dead65 !important; 
@@ -45,6 +45,9 @@ input placeholder{
   background-color: #dead65 !important; /* Change background color */
   border-color: #dead65 !important;    /* Change border color */
   color: #fff !important;             /* Change text color */
+}
+.bg-primary{
+  background-color: #dead65 !important;
 }
 div a{
   text-decoration :none;

@@ -18,3 +18,6 @@
     padding: 0 10px;        /* Add some padding around the icon */
     cursor: pointer;        /* Show pointer cursor on hover */
 }
+.bg-primary{
+    background-color: #dead65;
+}

@@ -10,6 +10,7 @@ const cartController=require('../../controllers/user/cartController');
 const checkoutController=require('../../controllers/user/checkoutControllers');
 const orderController= require('../../controllers/user/orderController');
 const wishlistController= require('../../controllers/user/wishlistController');
+const walletConttroller= require('../../controllers/user/walletController');
 
 //-----------------home Route-------------------
 router.get('/',userController.loadHomePage);     //home page
@@ -65,6 +66,10 @@ router.get('/changePassword',userAuth,profileController.changePasswordPage);
 router.post('/changePassword',userAuth,profileController.updatePassword);
 
 
+router.get('/referalCode/:refCode',userAuth,profileController.generateReferalCode);
+
+
+
 //-----------------addressManagement-------------------
 router.get('/addAddress',userAuth,profileController.addAddressForm);
 router.post('/addAddress',userAuth,profileController.SaveAddress);
@@ -82,8 +87,9 @@ router.put('/shoppingCart/addOne/:id',userAuth,cartController.addOne);
 router.get('/shoppingCart/deleteItem/:id',userAuth,cartController.deleteFromCart);
 
 //---------checkout--------------------
-router.get('/checkout',userAuth,checkoutController.loadCheckoutPage);
+router.post('/checkout',userAuth,checkoutController.loadCheckoutPage);
 router.post('/applycoupon',userAuth,checkoutController.applyCoupon);
+
 router.get('/addAddressCheckOut',userAuth,checkoutController.addAddressCheckOutForm);
 router.post('/addAddressCheckOut',userAuth,checkoutController.SaveCheckoutAddress);
 
@@ -91,15 +97,34 @@ router.post('/addAddressCheckOut',userAuth,checkoutController.SaveCheckoutAddres
 // -------------orderManagement------------
 
 router.post('/createOrder',userAuth,orderController.createOrder);
+router.post('/orders/payment/verify',userAuth,orderController.verifyPayment);
 router.get('/orderSuccess',userAuth,orderController.orderSuccess);
+router.get('/orderFailed/:id',userAuth,orderController.orderFailed);
+router.get('/retryPayment/:id',userAuth,orderController.retryPayment);
 router.get('/orders/detailedOrderView/:id',userAuth,orderController.detailedOrderView);
-router.get('/orders/cancelRequest/:id',userAuth,orderController.cancelRequest);
+router.put('/order/cancelAnItem',userAuth,orderController.cancelAnItem);
+router.get('/orders/cancelOrder/:id',userAuth,orderController.cancelOrder);
 router.get('/orders/trackorder/:id',userAuth,orderController.trackOrder);
+router.get('/orders/returnAnItemRequest/:orderId/:productId/:productName/:quantity/:price',userAuth,orderController.returnOrderRequestPage);
+router.post('/orders/returnRequest',userAuth,orderController.returnOrderRequest);
+router.put('/order/returnAnOrder',userAuth,orderController.returnAnOrder);
+router.get('/order/invoice/:id',userAuth,orderController.invoice);
+router.get("/orders/downloadInvoice/:orderId",userAuth,orderController. generatePDFInvoice);
 
-//--------------
+//--------------wishList-------------------------
 
 router.get('/addwishlist/:id',userAuth,wishlistController.addWishlist);
 router.get('/removeFromWishlist/:id',userAuth,wishlistController.removeFromwishlist);
+
+
+router.put('/wallet/topUp',userAuth,walletConttroller.topUp);
+router.post('/wallet/payment/verify',userAuth,walletConttroller.verifyPayment);
+
+
+
+
+
+
 
 
 

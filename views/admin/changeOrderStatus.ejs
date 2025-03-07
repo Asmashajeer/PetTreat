@@ -59,6 +59,9 @@
                                             <option value="Delivered">Delivered</option>
                                             <option value="Cancelled">Cancelled</option>
                                             <% break; %>
+                                        <%case 'Delivered':%>
+                                            <option value="Return">Return</option>                                           
+                                            <% break; %>
                                         <%default:%>
                                             <%break;%>
                                            
@@ -228,7 +231,7 @@
                     changeStatusBlock.classList.add('d-block');
                 });
             }           
-
+        //------change status order--------------------------------
             async function changeOrderStatus(orderId){              
                 const changeStatusOption=document.getElementById('orderStatusDropDown');
                 

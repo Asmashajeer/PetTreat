@@ -2,6 +2,8 @@
 const nodemailer =require('nodemailer');
 const bcrypt= require('bcrypt');
 const env =require('dotenv').config();
+const crypto=require('crypto');
+
 
 
 //-------------secure Password----------
@@ -51,10 +53,23 @@ const sendVerificationEmail=async function(email,otp){
     }
 }
 
+//------------------generate recept Number-----------------
+function generateReceiptNumber(prefix = "REC", length = 10) {
+    const randomBytes = crypto.randomBytes(length);
+    const receiptNumber = randomBytes.toString('hex').toUpperCase().slice(0, length);
+    return `${prefix}-${receiptNumber}`;
+}
+
+function generateInvoiceNumber(orderId) {
+    const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
+    return `INV-${orderId}-${timestamp}`;
+}
 
 
 module.exports={
     generateOtp,
     sendVerificationEmail,
-    securePassword
+    securePassword,
+    generateReceiptNumber,
+    generateInvoiceNumber
 }

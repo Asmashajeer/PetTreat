@@ -27,8 +27,7 @@ const orderSchema = new Schema({
     productImage:{
         type:String,
         required:true
-    },
-    
+    },    
     price:{
         type:Number,
         default:0        
@@ -40,6 +39,14 @@ const orderSchema = new Schema({
     subtotal:{
         type:Number,
         required:true
+    },
+    returnStatus:{
+      type: String,
+       default: null
+    },
+    returnReason:{
+      type:String,
+      default: null
     }
   }],
   totalPrice:{
@@ -67,8 +74,23 @@ const orderSchema = new Schema({
     type:String,
     required:true
   },
+  paymentStatus: {
+    type: String,
+    enum: ['Pending', 'Paid', 'Failed'],
+    default: 'Pending'
+  },
+  receipt:{
+    type:String,
+    default:null,
+    trim:true
+  },
   invoiceDate:{
     type:Date,
+  },
+  invoiceNo:{
+    type:String,
+    default:'',
+    trim:true
   },
   status:{
     type:String,
@@ -80,11 +102,22 @@ const orderSchema = new Schema({
     default:Date.now,
     required:true
   },
+  paymentDate:{
+    type:Date
+  },
+  deliveryDate:{
+    type:Date
+  },
+  shippingDate:{
+    type:Date
+  }, 
   coupon:{
     type:String,
-    default:''
+    default:null
   }
-});
+  
+}
+);
 
 //Export the model
 module.exports = mongoose.model('Order', orderSchema);

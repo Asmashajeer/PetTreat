@@ -1,4 +1,7 @@
 <%-include("../partials/user/header.ejs") -%>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 
 
   <style>
@@ -6,12 +9,15 @@
       font-size: 2rem;
       color: #007bff;
     }
+    .swal2-container {
+            z-index: 9999;
+        }
     .nav-pills .nav-link.active {
          background-color: #dead65 !important; /* Change to green */
         color: white !important; /* White text */
     }
   </style>
-</head>
+
 <body>
     <!-- breadcrumb -->
 	<section>
@@ -37,6 +43,8 @@
 
     <div class="container mt-4">
         <div class="row">
+          
+
           <!-- Vertical Nav (Left Side) -->
           <div class="col-md-2 mb-5">
             <ul class="nav nav-pills flex-column" id="v-pills-tab" role="tablist">
@@ -45,15 +53,18 @@
                </li>
               <li class="nav-item" role="presentation">
                 <a class="nav-link " id="addresses-tab" data-bs-toggle="pill" href="#addresses" role="tab" aria-controls="addresses" aria-selected="false">🏠Addresses</a>
-              </li>
-              <li class="nav-item" role="presentation">
-                <a class="nav-link" id="security-tab" data-bs-toggle="pill" href="#security" role="tab" aria-controls="security" aria-selected="false">🔒 Login & Security</a>
-              </li>
+              </li>              
               <li class="nav-item" role="presentation">
                 <a class="nav-link" id="orders-tab" data-bs-toggle="pill" href="#orders" role="tab" aria-controls="orders" aria-selected="false">🔍Orders</a>
               </li>
               <li class="nav-item" role="presentation">
                 <a class="nav-link" id="wishlist-tab" data-bs-toggle="pill" href="#wishlist" role="tab" aria-controls="wishlist" aria-selected="false">💛Wishlist</a>
+              </li>
+              <li class="nav-item" role="presentation">
+                <a class="nav-link" id="wallet-tab" data-bs-toggle="pill" href="#wallet" role="tab" aria-controls="wallet" aria-selected="false">💰 Wallet</a>
+              </li>
+              <li class="nav-item" role="presentation">
+                <a class="nav-link" id="referal-tab" data-bs-toggle="pill" href="#referal" role="tab" aria-controls="referal" aria-selected="false">ReferralCode</a>
               </li>
             </ul>
           </div>
@@ -63,7 +74,7 @@
             <div class="tab-content" id="v-pills-tabContent">
                <!-- profile Tab -->
                 <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                    <div class="card shadow text-center p-4" id="profileCard">
+                    <div class="card shadow  p-4" id="profileCard">
 
                     <!--profile content-->                   
                         <div class="row g-1 m-tb-2 ">  
@@ -118,17 +129,8 @@
                        <%})%> 
                     <%}%>    
                 </div>
-              </div>
-      
-              <!-- Security Tab -->
-              <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
-                <div class="card p-4">
-                  <h5 class="card-title">Login & Security</h5>
-                  <p class="card-text">Manage your password, email, and mobile number.</p>
-                </div>
-              </div>
-      
-              <!-- Orders Tab -->         
+              </div>  
+              <!-- Orders Tab -->       
               
               <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">               
                 <body class="bg-light">
@@ -164,28 +166,32 @@
                                         <thead>
                                             <tr>
                                                 <th>Order ID</th>
-                                                <th style="width: 200px;">Date</th>
+                                                <th style="width: 300px;">Date</th>
                                                 <th>Status</th>
+                                                <th>Payment Status</th>
+                                                <th>Payment Method</th>
                                                 <th>Items</th>
                                                 <th>Total</th>
-                                                <th style="width: 200px;">Actions</th>
+                                                <th style="width: max-content;">Actions</th>
                                                 
                                             </tr>
                                         </thead>
                                         <tbody>
-                                          <%if(orders){%>
-                                            <%orders.forEach(order=>{%>
+                                          <%if(orderData){%>
+                                            <%orderData.orders.forEach(order=>{%>
                                               <tr>
                                                   <td><%=order.orderId%></td>
                                                   <td><%=new Date(order.createdOn).toISOString().split('T')[0]%></td>
                                                   <td><span class="badge bg-secondary d-inline-block" style="white-space: pre-wrap;"><%=order.status%></span></td>
+                                                  <td><span class="badge bg-success d-inline-block"><%=order.paymentStatus%></span></td>
+                                                  <td><%=order.paymentMethod%></td>
                                                    <td><%=order.orderItems.length%></td>
                                                   <td><%=order.orderPrice%></td>
                                                   <td>
                                                        <a href="/orders/trackorder/<%=order.orderId%>" class="btn btn-outline-secondary btn-sm">Track</a>
                                                       <a href="/orders/detailedOrderView/<%=order.orderId%>" class="btn btn-outline-secondary btn-sm">Details</a>
                                                      <% if(order.status!=='Cancelled' && order.status!=='Delivered'){%>
-                                                        <a href="/orders/cancelRequest/<%=order.orderId%>" onclick="return confirmation('Are you sure ,you want to Cancel Order?')" class="btn btn-outline-secondary btn-sm">Cancel</a>
+                                                        <a href="/orders/cancelOrder/<%=order.orderId%>" onclick="return confirmation('Are you sure ,you want to Cancel Order?')" class="btn btn-outline-danger btn-sm">Cancel</a>
                                                       <%}%>
                                                   </td>
                                               </tr>
@@ -193,96 +199,187 @@
                                           <%}%>  
                                         </tbody>
                                     </table>
-                                </div>
+                                </div> 
+                                 <!-- Pagination -->
+                                 <nav>                 
+                                  <ul class="pagination justify-content-center">
+                                          <%if (orderData.currentPage>1){%>
+                                              <li class="page-item">
+                                                  <a class="page-link" href="?page=<%= orderData.currentPage-1 %>"  aria-label="Previous">
+                                                      <span aria-hidden="true">&laquo;</span>
+                                                  </a>
+                                              </li>                    
+                                          <%}%>
+                                          <%for(let i=1;i<=orderData.totalPages;i++){%> 
+                                          
+                                              <%if(i==orderData.currentPage){%>
+                                                  <li class="page-item">   
+                                                    <span  class="page-link " href=""><%= i %></span></a> 
+                                              <%}else{%>
+                                                  <li class="page-item" >
+                                                      <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                                                  </li>
+                                          <%}}%>
+                                          <%if (orderData.currentPage<orderData.totalPages){%>
+                                              <li class="page-item">
+                                                  <a class="page-link" href="?page=<%= orderData.currentPage+1 %>" aria-label="Next">
+                                                      <span aria-hidden="true">&raquo;</span>
+                                                  </a>
+                                              </li>
+                                          <% }%>       
+                                  </ul>
+                              </nav>                              
                             </div>
-                        </div>
-                
+                        </div>               
                         
-                    </div>
-                
-                    
-
-                  <!-- <div class="card p-4">
-                    <h5 class="card-title">Your Orders</h5>
-                    <p class="card-text">Track, return, cancel an order, download an invoice, or buy again.</p>
-                  </div> -->
+                    </div>    
               </div>
       
               <!-- Wishlist Tab -->
               <div class="tab-pane fade" id="wishlist" role="tabpanel" aria-labelledby="wishlist-tab">
                 <div class="container my-5">
-                <% if (wishlist) { %>	
-                  <div class="d-flex justify-content-between align-items-center mb-4">
-                      <h2 class="mb-0">My Wishlist</h2>
-                      <span class="text-muted">(<span id="wishlist-count"><%=wishlist.products.length%></span> items)</span>
-                  </div>
-          
-                  <!-- Wishlist Items Container -->
-                  <div class="wishlist-container">
-                    <%wishlist.products.forEach(product=>{%>	
-                      <!-- Single Wishlist Item -->
-                      <div class="card mb-3 wishlist-card">
-                          <div class="row g-0">
-                              <div class="col-md-4 d-flex align-items-center justify-content-center how-itemcart1">
-                                <img src="uploads/re-image/<%=product.productId.productImages[0]%>"  class="product-img rounded-start" alt="Product Image">
-                              </div>
-                              <div class="col-md-8">
-                                  <div class="card-body">
-                                      <div class="d-flex justify-content-between align-items-start">
-                                          <div>
-                                              <h6 class="card-title mb-1"><%=product.productId.productName%></h6>
-                                              <p class="card-text mb-1">
-                                                  <small class="text-muted">Brand: <%=product.productId.brand%></small>
-                                              </p>
-                                              <p class="card-text mb-1">
-                                                  <small class="text-muted">Category: <%=product.productId.category.name%></small>
-                                              </p>
-                                              <%if(product.productId.quantity>0){%>
-                                                <p class="card-text mb-2">
-                                                    <span class="badge bg-success">In Stock</span>
-                                                    <small class="text-muted ms-2"><%=product.productId.quantity%> items available</small>
+                  <% if (wishlist) { %>	
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="mb-0">My Wishlist</h2>
+                        <span class="text-muted">(<span id="wishlist-count"><%=wishlist.products.length%></span> items)</span>
+                    </div>
+            
+                    <!-- Wishlist Items Container -->
+                    <div class="wishlist-container">
+                      <%wishlist.products.forEach(product=>{%>	
+                        <!-- Single Wishlist Item -->
+                          <div class="card mb-3 wishlist-card">
+                              <div class="row g-0">
+                                <div class="col-md-4 d-flex align-items-center justify-content-center how-itemcart1">
+                                  <img src="uploads/re-image/<%=product.productId.productImages[0]%>"  class="product-img rounded-start" alt="Product Image">
+                                </div>
+                                <div class="col-md-8">
+                                      <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="card-title mb-1"><%=product.productId.productName%></h6>
+                                                <p class="card-text mb-1">
+                                                    <small class="text-muted">Brand: <%=product.productId.brand%></small>
                                                 </p>
-                                              <%}else{%>
-                                                <p class="card-text mb-2">
-                                                  <span class="badge bg-danger">outOf Stock</span>                                                 
+                                                <p class="card-text mb-1">
+                                                    <small class="text-muted">Category: <%=product.productId.category.name%></small>
                                                 </p>
-                                              <%}%>  
-                                              <h4 class="text-primary mb-3"><%=product.productId.regularPrice.toFixed(2)%></h4>
-                                          </div>
-                                          <div class="d-flex gap-2">
-                                              <a  href='/removeFromWishlist/<%=product.productId._i%>' class="btn btn-danger btn-sm" title="Remove from wishlist">
-                                                  <i class="zmdi zmdi-close"></i>
-                                              </a>
-                                          </div>
+                                                <%if(product.productId.stock>0){%>
+                                                  <p class="card-text mb-2">
+                                                      <span class="badge bg-success">In Stock</span>
+                                                      <small class="text-muted ms-2"><%=product.productId.quantity%> items available</small>
+                                                  </p>
+                                                <%}else{%>
+                                                  <p class="card-text mb-2">
+                                                    <span class="badge bg-danger">outOf Stock</span>                                                 
+                                                  </p>
+                                                <%}%>  
+                                                <h4 class="text-primary mb-3"><%=product.productId.regularPrice.toFixed(2)%></h4>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <a  href='/removeFromWishlist/<%=product.productId._id%>' class="btn btn-danger btn-sm" title="Remove from wishlist">
+                                                    <i class="zmdi zmdi-close"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-primary">
+                                                <i class="zmdi zmdi-shopping-cart me-2"></i>
+                                                Add to Cart
+                                            </button>
+                                        </div>
                                       </div>
-                                      <div class="d-flex gap-2">
-                                          <button class="btn btn-primary">
-                                              <i class="zmdi zmdi-shopping-cart me-2"></i>
-                                              Add to Cart
-                                          </button>
-                                      </div>
-                                  </div>
+                                </div>
                               </div>
                           </div>
-                      </div>
-                    <%})%>  
-                 </div>
-                <%}else{%> 
-                <!-- Empty Wishlist Message (shown when no items) -->
+                      <%})%>  
+                    </div>
+                  <%}else{%> 
+                        <!-- Empty Wishlist Message (shown when no items) -->
                     <div class="text-center py-5 ">
-                    <i class="zmdi zmdi-favorite-outline display-1 text-muted mb-3"></i>
-                    <h3>Your wishlist is empty</h3>
-                    <p class="text-muted">Browse our products and add your favorites to the wishlist!</p>
-                    <a href="/shop" class="btn btn-primary">
-                        Continue Shopping
-                    </a>
-                  </div>
-                <%}%>  
+                        <i class="zmdi zmdi-favorite-outline display-1 text-muted mb-3"></i>
+                        <h3>Your wishlist is empty</h3>
+                        <p class="text-muted">Browse our products and add your favorites to the wishlist!</p>
+                        <a href="/shop" class="btn btn-primary">
+                            Continue Shopping
+                        </a>
+                    </div>
+                  <%}%>  
+                </div>
+              </div>
+              <!-- Wallet Tab -->
+            <div class="tab-pane fade" id="wallet" role="tabpanel" aria-labelledby="wallet-tab">
+              <div class="row m-2">
+                <div class="card p-4 col-md-3 shadow m-2">
+                  <h3 class="card-title bg-light ">Wallet</h3>                 
+                  <div class="card-body align-items-center">
+                    <%if(wallet){%>
+                       <h6 id="walletbalance">Balance : ₹<%=wallet.walletAmount.toFixed(2)%></h6>
+                    <%}else{%>
+                      <h6 id="walletbalance">Balance : ₹ 0.00 %></h6>
+                    <%}%>
+                  </div>  
+                  <!-- <button href="#" class="btn btn-sm text-end ">Top Up</buttom>                                      -->
+                </div>
+                                      
+                <div class="card-body col-md-6 m-2 border">
+                    <div class="table-responsive">
+                        <table class="table bg-transperant" id="walletTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>TransactionType</th>
+                                    <th>Description</th>                                  
+                                    <th>orderId</th>
+                                </tr>
+                            </thead>
+                            <tbody id="walletTableBody" class="bg-transperant">
+                            <%if(wallet){%>
+                                <%wallet.transactions.forEach(transaction=>{%>
+                               <tr>                                   
+                                    <td><%=moment(transaction.timestamp).format('DD/MM/YYYY')%></td>                                  
+                                    <td>₹ <%=transaction.amount.toFixed(2)%></td>
+                                    <td><%=transaction.transactionType%></td>
+                                    <td><%=transaction.description%></td>
+                                    <%if(transaction.orderId){%>
+                                        <td><%=transaction.orderId%></td> 
+                                    <%}%>                                   
+                                </tr>    
+                                <%})%>
+                            <%}%>   
+                            </tbody>
+                        </table>
+                    </div>                    
+                </div> 
+              
+                <div class="input-group input-group-sm  w-25 " id="addAmount">
+                  <form  class="border ml-2 p-1">
+                    <input type="number" id="amount" name="amount"   class="form-control " placeholder="amount " required>
+                    <button type ="button" class="btn btn-sm text-success " id="btAddMoney"><i class="fas fa-plus-circle ">Add money</i></button>
+                    <div class="alert alert-danger text-center d-none" id="addAmounterror"> </div>
+                </div>    
+              </div> 
             </div>
+              <!-- referalCodeTab -->
+            <div class="tab-pane fade" id="referal" role="tabpanel" aria-labelledby="referal-tab">
+              <div class="card p-4 col-md-6 shadow m-auto">
+                <%if(referralCode!==''){%>
+                  <h5 class="card-title bg-light ">Referal Code : <%=referralCode%></h5>
+                <%}else{%>  
+                <!-- <h3 class="card-title bg-light ">Get Referal Code</h3> -->
+                    <a  class="btn btn-sm bg-secondary text-white" href="#" onClick="getReferalCode('<%=user.name%>')">Get Referal Code</a>
+                  <div class="card-body align-items-center">
+                    <h5 id="referalCode">Referal Code : </h5>
+                  </div>
+                <%}%>
+              </div>
+            </div> 
+          </div>
+
           </div>
         </div>
-      </div>
-
+    </div>
       <script>
         document.addEventListener('DOMContentLoaded', function() {
             const selectedTab = "<%= selectedTab %>";
@@ -299,7 +396,122 @@
                     tabPane.classList.add('show', 'active');
                 }
             }
+            
         });
+
+        //----------------------generate Rferal Code------------------------
+      function getReferalCode(name){              
+               const refCode=name.substring(0, 4).toUpperCase() + Math.floor(1000 + Math.random() * 9000);               
+               const response = fetch(`/referalCode/${refCode}`)
+               .then(response=>response.json())
+               .then(data=>{
+                console.log(data.referralCode);
+                 document.getElementById('referalCode').innerText+=data.referralCode;
+
+               }).catch(error=>console.log("error generating referal code",error));
+            }
+
+              //------------------------add money to Wallet-----------------
+   const btAddMoney=document.getElementById('btAddMoney');
+   btAddMoney.addEventListener('click',async function(){
+         console.log(  "clicked");
+    const amountError=document.getElementById('addAmounterror');
+      const amount=parseInt(document.getElementById('amount').value);
+      console.log( amount);
+      amountError.classList.remove('block');
+      amountError.innerText = '';
+      if(isNaN(amount)||amount<0){
+        amountError.classList.remove('d-none');
+        amountError.classList.add('block');
+        amountError.innerText="please enter a amount";
+        return;
+      }
+      try {
+        const response = await fetch('/wallet/topUp', {
+          method: 'put',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: amount }),
+        });
+
+        const data = await response.json();      
+        if (data.topUp) {
+          initializePayment(data.topUp, data.user);
+        } else {
+          document.getElementById('addAmounterror').innerText= data.message || 'Failed to initiate payment', 'error';
+        }
+      } catch (error){
+         document.getElementById('addAmounterror').innerText= "Error Something went wrong. Please try again.", 'error';
+      }
+   });
+  
+    
+     
+    
+    function initializePayment(topUp,user){
+    var options = {
+        key: "<%= process.env.RAZORPAY_KEY_ID %>",
+        amount: topUp.amount *100,
+        currency: topUp.currency,
+        name: "PetTreat food and Toys",
+        description: "PetTreat test Transactions",
+        order_id: topUp.id,
+        handler: async function (response) {
+          console.log(response);
+            const verifyResponse = await fetch("/wallet/payment/verify",
+             { method: "POST", 
+               headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({  razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature})             
+              
+              });
+            const data=await verifyResponse.json();
+            if(data){
+              // document.getElementById('walletbalance').innerText=data.wallet.amount;
+              document.reload();
+            }else{
+              const amountError=document.getElementById('addAmounterror').innerText="verification Error";
+            }
+           
+        },
+        prefill: {
+            name: user.name,
+            email: user.email                    
+        },
+        config: {
+            display: {
+                blocks: {
+                    banks: {
+                        name: 'All Payment Options',
+                    instruments: [
+                        {
+                        method: 'upi'
+                        },
+                        {
+                        method: 'card'
+                        },
+                        {
+                            method: 'wallet'
+                        },
+                        {
+                            method: 'netbanking'
+                        }
+                    ],
+                    },
+                },
+                sequence: ['block.banks'],
+                preferences: {
+                    show_default_blocks: false,
+                },
+            },  
+        },
+        
+    
+        theme: { color: "#dead65" }
+    };
+    var rzp = new Razorpay(options);
+    rzp.open();
+}
     </script>
 
 

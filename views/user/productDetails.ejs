@@ -1,7 +1,5 @@
 <%-include("../partials/user/header.ejs") -%>
-<style>
-	
-  </style>
+>
 	<!-- breadcrumb -->
 	<section>
 		<div class="container">
@@ -89,12 +87,27 @@
 							Brand : <%=product.brand%>
 						</span>
 						<div class=" p-r-50 p-t-5 p-lr-0-lg">
-							<p class="mtext-106 cl2">
-								$<%=product.regularPrice%>
-							</p>
-							<span class="mtext-100 cl3">
+							<%if(product.productOffer>0){%>
+								<s><%=product.regularPrice.toFixed(2)%></s>
+								<span class="text-danger"><b><%=product.salePrice.toFixed(2)%></b></span>											
+								<span class="badge rounded-pill bg-danger  ">Offer Price</span>
+							<%}else{%>
+								<%=product.salePrice.toFixed(2)%>
+							<%}%>		
+
+
+
+
+
+							<!-- <p class="mtext-106 cl2">
+								$<%=product.salePrice%>
+							</p> -->
+							<div>
+								<span class="mtext-100 cl3">
 								weight : <%=product.weight%>
-							</span>
+								</span>
+							</div>
+							
 						</div>
 						
 						
@@ -124,7 +137,7 @@
 										<div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
 											<i class="fs-16 zmdi zmdi-minus"></i>
 										</div>
-										<input id="numOfproduct" class="mtext-104 cl3 txt-center num-product" type="number" name="numOfproduct" value="1" min="1" max="<%=product.stock%>">
+										<input id="numOfproduct" class="mtext-104 cl3 txt-center num-product" type="number" name="numOfproduct" value="1" min="1" max="3">
 
 										<div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
 											<i class="fs-16 zmdi zmdi-plus"></i>
@@ -134,10 +147,18 @@
 									<div  id="error-message" class="alert alert-danger text-center d-none">							
 									  </div>
 									<div class="flex-l m-r-20 m-tb-10">
-										<button type="submit" id="addToCartButton" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail" title="Add to Cart">
-											Add to cart
-										</button>
+										<%if(locals.user){%>
+											<button type="submit" id="addToCartButton" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail" title="Add to Cart">
+												Add to cart
+											</button>
+										<%}else{%>
+											<button type="submit" id="addToCartButton" disabled class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail" title="Add to Cart" >
+												Add to cart
+											</button>
+											<p class="text-warning fs-14">Please sign in to Add Cart!</p>
+										<%}%>
 									</div>
+									
 								</form>	
 								
 
@@ -379,49 +400,71 @@
 		</div>
 	</section>
 	<script>
-		 document.addEventListener("DOMContentLoaded", function() {
 
+		 document.addEventListener("DOMContentLoaded", function() {
+		
 			const form = document.getElementById('addToCartForm');
 			const productStock=document.getElementById('productStock');
 			const addToCartButton=document.getElementById('addToCartButton');	
-			const errorMessage=document.getElementById('error-message')	;	
-			form.addEventListener('submit',function(e){	
+			const errorMessage=document.getElementById('error-message')	;
+			const productId = document.getElementById('productId').value;
+			
+			const numOfproduct = document.getElementById('numOfproduct');
+			const quantity = parseInt(numOfproduct.value);
+			numOfproduct.addEventListener('change',function(){
+					if(quantity>parseInt(productStock.value)){
+					errorMessage.classList.remove('d-none');
+					errorMessage.innerText=`Out of stock only product ${Stock.value} is available`;
+					alert(`product is Out of stock only product ${Stock.value} is available`);
+					return;
+					}
+			});
+			form.addEventListener('submit',async function(e){	
 				e.preventDefault();						
 				const productId = document.getElementById('productId').value;
-        		const quantity = parseInt(document.getElementById('numOfproduct').value);
-				
+        		const quantity = parseInt(numOfproduct.value);
+			
 				if (!quantity || quantity < 1) {
 					errorMessage.classList.remove('d-none');
+					errorMessage.classList.add('block');
 					errorMessage.innerText=`select a quantity`;
 					alert('Please select a valid quantity.');
 					return;
 				}
 				if ( quantity > parseInt(productStock.value)) {
 					errorMessage.classList.remove('d-none');
+					errorMessage.classList.add('block');
 					errorMessage.innerText=`Out of stock only product ${Stock.value} is available`;
 					alert(`product is Out of stock only product ${Stock.value} is available`);
 					return;
 				}
-				fetch(`/addToCart?id=${productId}`,{
-					method:'POST',
-					headers:{
-						'Content-Type': 'application/json',
-					},
-					 body: JSON.stringify({quantity})
-				})			
-				.then(response => {
+				console.log('productId  : ',productId);
+				console.log('quantity:' ,quantity);
+				try{
+					const response=await fetch('/addToCart',{
+						method:'POST',
+						headers:{
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({quantity,productId})
+					});	
 					if (!response.ok) {
-						throw new Error('Network response was not ok');
+            				throw new Error(`HTTP Error! Status: ${response.status}`);
+        			}		
+					const data= await response.json();						
+					if(data.cart){
+						console.log('success', data.cart);
+						window.location.href="/shopingCart";
+					}else{
+						console.log(data.message);
+						errorMessage.classList.remove('d-none');
+						errorMessage.classList.add('block');
+						errorMessage.innerText=data.message;
 					}
-					return response.json();
-				})
-				.then(data => {
-					console.log('success', data);
-					window.location.href="/shopingCart"
-				})
-				.catch(error => {
-					console.error('Error:', error);
-				});
+					
+				}catch(error){
+					console.error('Error adding to Cart:', error);
+				}
 			});
 		});
 

@@ -161,7 +161,6 @@ const categorisedProducts= async(req,res)=>{
     }
 }
 
-
                       
 
 
@@ -171,4 +170,5 @@ module.exports={
    filterShopping,
    productSearch,
    categorisedProducts
+   
 }

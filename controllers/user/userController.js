@@ -3,15 +3,57 @@ const Category=require('../../models/categorySchema');
 const Brand =require('../../models/brandSchema');
 const Product=require('../../models/productSchema');
 const Address= require('../../models/addressSchema');
+const Wallet = require('../../models/walletSchema');
+const ReferralOffer= require('../../models/referralOfferSchema');
 
 const nodemailer =require('nodemailer');
 const env =require('dotenv').config();
 const bcrypt= require('bcrypt');
 const Cart = require('../../models/cartSchema');
+const { session } = require('passport');
 
 //------ to generate  OTP-------
 function generateOtp(){
     return String(Math.floor(100000 + Math.random() *900000));
+}
+async function addRewards(referralcode,userId){
+    
+    const findReferer= await User.findOne({referralCode:referralcode});
+    const reward=await ReferralOffer.findOne();
+    const user=await User.findById(userId);
+    console.log(reward);
+    let transaction={
+        transactionType:'Credit',      
+        amount:reward.refererAmount,
+        description:`For Referring the user - ${user}` 
+    };
+    //-----add reward to referer
+    const refererReward= await Wallet.updateOne(
+        {userId:findReferer._id},
+        {
+            $push:{transactions:transaction},
+            $inc:{walletAmount:reward.refererAmount}
+        },{ upsert: true });
+    console.log(refererReward);
+    
+    if(!refererReward){
+        console.log('Error:reward cannot add to referrer'); 
+    }
+    console.log('reward added to referrer'); 
+    
+    let transactions={
+        transactionType:'Credit',      
+        amount:reward.refereeAmount,
+        description:`Refered by  - ${findReferer.name}`
+    };
+
+    const refereeReward=new Wallet({
+        userId:userId,
+        transactions,
+        walletAmount:reward.refereeAmount
+    })
+    await refereeReward.save();    
+    console.log('reward added to referreee'); 
 }
 
 
@@ -130,7 +172,7 @@ const loadSignUp=async(req,res)=>{
 //--------register user--------------
 const createUser = async (req,res)=>{   
     try{
-            const {name,email,password,confirmPassword}=req.body;
+            const {name,email,password,confirmPassword,referralcode}=req.body;
            
             console.log(req.body);
             console.log(email);
@@ -140,7 +182,14 @@ const createUser = async (req,res)=>{
             if(findUser){
                 return  res.render('register',{message:'user already registered with this email'});
              }
-           
+             
+             if(referralcode){
+                const findReferer= await User.findOne({referralCode:referralcode});
+                if(!findReferer){
+                    return  res.render('register',{message:"Invalid ReferralCode"});
+                }
+                req.session.referralcode=referralcode;
+             }
             const otp= generateOtp();
             console.log(`otp generated`);
             const emailSent = await sendVerificationEmail(email,otp);
@@ -179,8 +228,11 @@ const verifyOtp= async(req,res)=>{
                 email:user.email,
                 password:secPassword
              });
-             await saveUserData.save();
+             await saveUserData.save();             
              req.session.user=saveUserData._id;
+             if(req.session.referralcode){
+                addRewards(req.session.referralcode,saveUserData._id);
+             }   
              res.json({success:true,redirectUrl:'/'})
         }else{
             res.status(400).json({success:false,message:'Invalid OTP  please tryagain'});

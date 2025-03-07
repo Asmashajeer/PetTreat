@@ -284,8 +284,8 @@
                     displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
                     isValid = false;
                 }
-                if (parseFloat(price) <= parseFloat(saleprice)) {
-                        displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
+                if (parseFloat(price) < parseFloat(saleprice)) {
+                        displayErrorMessage('regularPrice-error', 'Regular price must be greater thanoe equa sale price.');
                                 isValid = false;
                 }
     
@@ -296,10 +296,10 @@
                 }
     
     
-                if (images.files.length === 0) {
-                    displayErrorMessage("imageInput1-error",'Please select an image.');
-                    isValid = false;
-                }
+                // if (images.files.length === 0) {
+                //     displayErrorMessage("imageInput1-error",'Please select an image.');
+                //     isValid = false;
+                // }
                 return isValid;
             }
 
@@ -341,7 +341,7 @@
             try{  
               const productId ='<%=product._id%>'.trim();
               // formData.append('id', productId);
-              alert(' updating data');
+             
               const response=await fetch(`/admin/updateProduct?id=${productId}`, {
                 method: 'PUT',
                 headers: {
@@ -351,7 +351,7 @@
               });
               const result=await response.json();
               if (response.ok) {
-                  alert('Product updated successfully!');
+                 
                   window.location.href='/admin/products/' 
               } else {
                   alert(`Error: ${result.message || 'Failed to update the product.'}`);

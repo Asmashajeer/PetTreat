@@ -4,6 +4,7 @@ const Product= require('../../models/productSchema');
 const Cart = require('../../models/cartSchema');
 const User=require('../../models/userSchema');
 const Address = require('../../models/addressSchema');
+const Wallet = require('../../models/walletSchema');
 
 
 //---------list orders------------------------------
@@ -142,7 +143,13 @@ const changeOrderStatus =async (req,res)=>{
                updated= await Product.findByIdAndUpdate(item.product,{$inc:{quantity:item.quantity}}, { new: true });            
            }           
         }    
-         
+        if(changedStatus==='Delivered'){
+            const orderData= await Order.findOneAndUpdate({orderId:orderId}, { $set: { status: changedStatus,paymentStatus:'Paid'} },{new:true});
+        if(!orderData){
+            console.log("order Status not changed!");
+            return res.json({success:false,message:"order Status not updated!"})
+        } 
+        }
         const orderData= await Order.findOneAndUpdate({orderId:orderId}, { $set: { status: changedStatus } },{new:true});
         if(!orderData){
             console.log("order Status not changed!");
@@ -161,10 +168,86 @@ const changeOrderStatus =async (req,res)=>{
 
     }
 }
+//-----------------management Return-------------------
+const manageReturnForm= async(req,res)=>{
+    const {orderId,productId}= req.params;
+    console.log(orderId,productId);
+    const order =await Order.findOne({orderId:orderId});
+    for (let item of order.orderItems) {
+        if (item.product.toString() === productId && item.returnStatus==='Return Request') {
+            console.log('----------------------',item);
+             return res.render('manageReturn',{ orderId:orderId,item:item});
+        }
+    }
+}
+//-----------------------return management---------------------
+//-------------------return An Item---------------
+const updateReturn =async(req,res)=>{
+    const userId=req.session.user;
+    try {
+        const { orderId, productId,quantity,price ,action}=req.body;
+        const order= await Order.findOne({orderId:orderId});
+        if(order.status==='Cancelled' ||order.status==='Returned'){
+            return res.json({success:false,message:'order already cancelled or returned'});
+        }    
+        if (action === "reject") {
+            let  updatedOrder= await Order.updateOne(
+                { orderId: orderId, status: "Delivered", "orderItems.product": productId, "orderItems.returnStatus": "Return Request" },
+                { $set: { "orderItems.$.returnStatus": "Return Rejected" } });            
+                if(!updatedOrder.modifiedCount>0){
+                    console.log('Cannot Accept tthe return request ');
+                     return res.json({success:false,message:"Cannot Accept tthe return request"});
+                }
+                return res.json({success:true,message:"Admin rejected the return request "});
+        }
+       
+        if (action === "accept") {
+           
+            let  updatedOrder= await Order.updateOne(
+                { orderId: orderId, status: "Delivered", "orderItems.product": productId, "orderItems.returnStatus": "Return Request" },
+                { $set: { "orderItems.$.returnStatus": "Return Approved" } }
+            );
+            if(!updatedOrder.modifiedCount>0){
+                console.log('Cannot Accept tthe return request ');
+                 return res.json({success:false,message:"Cannot Accept tthe return request"});
+            }
+                               
+            const returnQuantity =parseInt(quantity);        
+            const  returnPrice= parseFloat(price);
+            console.log(orderId,productId,returnQuantity,returnPrice);
+            const totalReturnPrice=returnPrice*returnQuantity;     
+      
+            // refund to user wallet        
+            if(order.paymentStatus==='Paid'){
+                let transaction={
+                    transactionType:'Credit',      
+                    amount:totalReturnPrice,
+                    description:'Return an item from Order'
+                };
+                //-----add  to wallet
+                const updatedWallet= await Wallet.updateOne(
+                    {userId:userId},
+                    {
+                        $push:{transactions:transaction},
+                        $inc:{walletAmount:totalReturnPrice}
+                    },{ upsert: true });
 
+                console.log( updatedWallet);
+                return res.status(200).json({success:true,message:'Accepted'});  
+            }
+        } 
+            
+               
+    } catch (error ) {
+        console.log("ServerError :",error);
+        res.status(500).json({success:false,message:"Return  this item failed"});
+    }
 
+}
 module.exports={
     loadOrders,
     viewOrder,
     changeOrderStatus,
+    manageReturnForm,
+    updateReturn
 }  

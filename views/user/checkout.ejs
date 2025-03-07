@@ -1,4 +1,6 @@
 <%-include("../partials/user/header.ejs") -%>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <!-- breadcrumb -->
 <section>
     <div class="container m-b-50">
@@ -20,7 +22,7 @@
     </div>
 </section>
     <div class="container py-4">
-        
+        <div id="order-error" class="alert alert-danger text-center d-none">	</div>
         <div class="row g-4">
             <!-- Left Column -->
             <div class="col-lg-8">
@@ -31,6 +33,7 @@
                     </div>             
                              
                     <!-- Default Address -->
+                  <%if(addressData){%>  
                     <%addressData.address.forEach((data,index)=>{%>
                         <div class="card mb-1 pl-5">
                             <!-- <div class="card-body"> -->
@@ -43,7 +46,7 @@
                                             <p class="mb-2"><%=data.phone%></p>
                                             <div>
                                                 <a class="text-primary me-2" href="/editAddress?id=<%=data._id%>">Edit</a>
-                                                <a class="text-secondary me-2" href="/deleteAddress?id=<%=data._id%>" onclick="return confirm('Are you sure to delete?')">Remove</a>
+                                                
                                             </div>
                                         </div>
                                     </label>
@@ -51,19 +54,23 @@
                             <!-- </div> -->
                         </div>
                     <%})%>
+                  <%}%>
                 </form>
                     <form class="card mb-1 col-lg-8 shadow border border-light p-2">
                         <h5>Payment Method</h5>                        
                         <div class="form-group mt-3">
+                          
                             <div class="d-flex align-items-center mb-2 pl-5">
-                                <input type="radio" name="paymentMethod" value="cod" class="me-2" checked> Cash on Delivery (COD)
+                                <input type="radio" name="paymentMethod" value="cod" id="cod" class="me-2" checked> Cash on Delivery (COD)
                             </div>
                             <div class="d-flex align-items-center mb-2 pl-5">
-                                <input type="radio" name="paymentMethod" value="card" class="me-2"> Credit/Debit Card
+                                <input type="radio" name="paymentMethod" value="razorpay"  id="razorpay" class="me-2"> Razorpay
                             </div>
+                           
                             <div class="d-flex align-items-center mb-2 pl-5">
-                                <input type="radio" name="paymentMethod" value="razorpay" class="me-2"> Razorpay
+                                <input type="radio" name="paymentMethod" value="wallet" id="wallet" class="me-2"> Wallet
                             </div>
+                           
                         </div>                    
                         <div id="card-details" style="display: none;">
                             <input type="text" class="form-control" name="cardNumber" placeholder="Card Number">
@@ -86,8 +93,8 @@
                         <div class="d-inline-block bor7 p-3 shadow  float-left" style="width:200px" >
                             <strong>Code:</strong> <%= coupon.couponCode %><br>
                             <strong>Discount:</strong> <%= coupon.discountValue.toFixed(2)%>&emsp;
-                            <strong>Expires On:</strong> <%= coupon.expireOn.toLocaleDateString("en-GB") %>
-                           
+                            <strong>Expires On:</strong> <%= coupon.expireOn.toLocaleDateString("en-GB") %><br> 
+                            <strong>Min Purchase:</strong> <%= coupon.minimumPrice.toFixed(2)%>                         
                         </div>
                 <% })}%>
            </div>   
@@ -95,7 +102,8 @@
            
             <!-- Right Column -->
             <div class="col-lg-4">
-                <!-- Coupon Section -->
+              
+                <!------------------ Coupon Section-------------------- -->
                 <div class=" bor7 p-3 shadow mb-2">
                     <h6>Coupon Code</h6>
                     <p class="text-muted small">Enter your coupon code if you have one</p>
@@ -103,6 +111,7 @@
                             <input type="text" class="form-control" id="couponCode" name="couponCode" placeholder="Coupon Code">
                             <button  onclick="applyCoupon(event)" class="btn btn-primary" >APPLY</button>                    
                         </div>
+                        <p id="alert-info" style="color: rgb(200, 255, 0); size: 0.1em;"></p>
                         <p id="errorMessage" style="color: red; size: 0.1em;"></p>
                 </div>
                 <div class="card">
@@ -134,10 +143,14 @@
                                 <strong> Total</strong>                                
                                 <h6 ><strong><%=totalPrice.toFixed(2)%></strong></h6>
                             </div>
-                            <div class="d-flex justify-content-between mb-2">
+                            
+                           
+                              
+                            <div class="d-flex justify-content-between mb-2">        
                                 <span>Coupon discount</span>                           
-                                    <input type="number" id="discount" value="<%=discount.toFixed(2)%>"  style="width:100px; text-align: end; padding: 0; " disabled>                                 
+                                    <p id="discount"><%=discount.toFixed(2)%></p>                                 
                             </div>
+
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Delivery Fee</span>
                                
@@ -145,12 +158,12 @@
                             </div>
                             <div class="d-flex justify-content-between">
                                 <strong>Order Total</strong>     
-                                     <%let orderTotal= totalPrice-discount-deliveryPrice%>                                           
+                                     <%let orderTotal= totalPrice-discount+deliveryPrice%>                                           
                                     <h5 id="orderTotal"><strong><%=orderTotal.toFixed(2)%></strong></h5>                                
                             </div>
                         </div>
 
-                        <button class="btn btn-primary w-100 mb-3" onclick="placeOrder(event)" >place An order</button>
+                        <button class="btn btn-primary w-100 mb-3" onclick="placeOrder(event)" >Place An order</button>
 
                     </div>
                 </div>
@@ -160,10 +173,35 @@
 
 
     <script>
+        
+        const discountReferral = document.getElementById('discountReferral');
+        const discountField = document.getElementById('discount');
+        const totalElement = document.getElementById('orderTotal');  
+        const orderTotal = parseFloat(totalElement.innerText); 
+        const cod=document.getElementById('cod');
+        const razorpay=document.getElementById('razorpay');
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const totalElement = document.getElementById('orderTotal');  
+        const orderTotal = parseFloat(totalElement.innerText); 
+        const cod=document.getElementById('cod');
+        const razorpay=document.getElementById('razorpay');
+            if (orderTotal> 1000) {
+                cod.disabled = true; // Disable COD option
+                cod.parentElement.style.opacity = "0.5"; // Make it look disabled
+                razorpay.checked=true;
+            }
+        });
+        
+        
 
       //----------------apply coupon---------------------  
       async function applyCoupon(e) {  
         const couponCode = document.getElementById('couponCode').value;
+       if(!couponCode){
+        document.getElementById('alert-info').innerText="Enter a coupon code";
+        return;
+       }
         console.log(couponCode);
         const discountField = document.getElementById('discount');
         const totalElement = document.getElementById('orderTotal');  
@@ -180,12 +218,12 @@
             const result = await response.json();
 
             if (result.success) {
-                alert("Coupon applied successfully!");
+                document.getElementById('alert-info').innerText=" Coupon applied!";
                 // Update discount field and total price
-                discountField.value = result.discountCoupon.discount.toFixed(2); 
+                discountField.textContent = result.discountCoupon.discount.toFixed(2); 
                 const newTotal = orderTotal - result.discountCoupon.discount;
                 totalElement.innerText = newTotal.toFixed(2); // Update displayed total
-                document.getElementById('couponCode').value="";
+                document.getElementById('couponCode').value;
                 errorMessage.innerHTML = ""; 
                                    
             } else {
@@ -197,8 +235,7 @@
         }
 
         }
-
-
+       
         //----------select payment method as card--------------------
        document.querySelectorAll('input[name="paymentMethod"]').forEach((input) => {
             input.addEventListener("change", function () {
@@ -208,13 +245,24 @@
         });
 
         //--------createOrder-------------------------------------
-      async function  placeOrder(event){
+    async function  placeOrder(event){
         event.preventDefault(); 
-        const  deliveryAddress=document.querySelector('input[type="radio"][name="address"]:checked').value;
-        if (! deliveryAddress) {
-             alert("Please select a delivery address.");
-        return;
+        const orderError=document.getElementById('order-error');
+        const addressOptions = document.querySelectorAll('input[type="radio"][name="address"]');
+
+        // Check if there are any radio buttons present
+        if (addressOptions.length === 0) {
+            orderError.classList.remove("d-none");
+            orderError.classList.add("block");
+            orderError.textContent="No delivery address options available. Please add an address.";
+            return;
         }
+
+       
+
+         const  deliveryAddress=document.querySelector('input[type="radio"][name="address"]:checked').value;        
+                   
+       
         const  paymentMethod=document.querySelector('input[type="radio"][name="paymentMethod"]:checked').value;
         console.log(paymentMethod);
         if (! paymentMethod) {
@@ -225,36 +273,112 @@
         const orderData={
             addressId:deliveryAddress,  
             paymentMethod: paymentMethod,        
-            discount:parseFloat(document.getElementById("discount").value) || 0,
+            discount:parseFloat(document.getElementById("discount").innerText)|| 0,
             deliveryPrice:parseFloat(document.getElementById("deliveryPrice").innerText) || 0,
-            orderPrice:parseFloat(document.getElementById("orderTotal").innerText),    
+            orderPrice:parseFloat(document.getElementById("orderTotal").innerText),
+            // coupon: document.getElementById("couponCode").value
         };
-        console.log(orderData);
-
-        try {
-       
+        console.log(orderData);      
+        try{     
             const response = await fetch("/createOrder", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
+            body: JSON.stringify(orderData),
             });
-
-        const result = await response.json();
-        if (result.success) {
-            alert("Order placed successfully!");
-            console.log(result);
-            window.location.href = `/orderSuccess?id=${result.orderId}`; // Redirect to order success page
-        } else {
-            alert(result.message || "Failed to place order.");
+            const data= await response.json();
+       
+            alert(data.message) ;
+            if (data.redirect) {
+                window.location.href = data.redirect;
+                return;
+            }
+            if (data.orderDetails){
+                initializePayment(data.orderDetails,data.user);
+            }          
+            else{
+                    alert(data.message || "Failed to place order.");
+                    orderError.classList.remove('d-none');
+                    orderError.innerText=data.message;
+                    console.log(data);
+            }
+        }catch (error) {
+            console.error(" Error placing order:", error);
+            alert("An error occurred while placing the order. Please try again.");
         }
-    } catch (error) {
-        console.error("Error placing order:", error);
-        alert("Something went wrong. Please try again.");
     }
 
-      }
-
-
-
+    function initializePayment(order,user){
+            var options = {
+                key: "<%= process.env.RAZORPAY_KEY_ID %>",
+                amount: order.amount *100,
+                currency: order.currency,
+                name: "PetTreat food and Toys",
+                description: "PetTreat test Transactions",
+                order_id: order.id,                
+                handler: async function (response) {
+                  try{
+                        const verifyResponse = await fetch("/orders/payment/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(response) });
+                        const data=await verifyResponse.json(); 
+                        console.log(data);    
+                        if(data.success)             
+                            window.location.href = data.redirect;
+                        else{
+                            console.log("verification failed");
+                            window.location.href = data.redirect;
+                        }
+                    }catch(error){
+                        console.error(" Error during payment verification:", error);
+                        alert("An unexpected error occurred. Redirecting to order failure page...");
+                        window.location.href = `/orderFailed/${order.id}`;
+                    }    
+                },
+                prefill: {
+                    name: user.name,
+                    email: user.email                    
+                },
+                config: {
+                    display: {
+                        blocks: {
+                            banks: {
+                                name: 'All Payment Options',
+                            instruments: [
+                                {
+                                method: 'upi'
+                                },
+                                {
+                                method: 'card'
+                                },
+                                {
+                                    method: 'wallet'
+                                },
+                                {
+                                    method: 'netbanking'
+                                }
+                            ],
+                            },
+                        },
+                        sequence: ['block.banks'],
+                        preferences: {
+                            show_default_blocks: false,
+                        },
+                    },  
+                },
+                
+            
+                theme: { color: "#dead65" }
+            };
+            var rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (response){
+                // alert(response.error.code);
+                 alert(response.error.description +response.error.metadata.order_id);
+                // alert(response.error.source);
+                // alert(response.error.step);
+                // alert(response.error.reason);
+                // alert(response.error.metadata.order_id);
+                // alert(response.error.metadata.payment_id);
+                window.location.href = `/orderFailed/${order.id}`;
+            });
+            rzp.open();
+     }
     </script>
     <%-include("../partials/user/footer.ejs") -%>

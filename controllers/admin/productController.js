@@ -242,6 +242,45 @@ const deleteImage= async(req,res)=>{
     }
 }
 
+//------------------Add product Offfer----------------------
+
+const  addProductOffer = async(req,res)=>{
+    try{
+        console.log("----------------------------------");
+        const {percentage,productId}=req.body;
+        const product= await Product.findOne({_id:productId});
+        const category=await Category.findOne({_id:product.category});
+        if(category.categortOffer>percentage){
+            return res.json({status:false,message:"this product alreadyhas a categoryoffer"});
+        }
+        product.salePrice=product.salePrice-Math.floor(product.regularPrice*(percentage/100));
+        product.productOffer=parseInt(percentage);
+            await product.save();
+            res.json({status:true,message:"OffferAdded"});
+            //product.categoyOffer=0;
+    }catch(error){
+        console.log("errro while adding ProductOffer",error);
+        res.redirect('/pageError');
+    }
+}    
+
+//-----------------removeProduct Odrder----------------------
+const  removeProductOffer = async(req,res)=>{
+    try{
+        const {productId}=req.body;
+        const product= await Product.findOne({_id:productId});
+        const percentage=parseInt(product.productOffer);
+        product.salePrice=product.salePrice+Math.floor(product.regularPrice*(percentage/100));
+        product.productOffer=0;
+        await product.save();
+        res.json({status:true});
+            //product.categoyOffer=0;
+    }catch(error){
+        console.log("errro while adding ProductOffer",error);
+        res.redirect('/pageError');
+    }
+}    
+
 module.exports={
     getAddProduct,
     addProduct,
@@ -250,5 +289,7 @@ module.exports={
     unBlockProduct,
     getEditProduct,
     deleteImage,
-     updateProduct
+     updateProduct,
+     addProductOffer,
+   removeProductOffer
 }

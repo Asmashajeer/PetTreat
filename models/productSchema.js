@@ -29,7 +29,11 @@ const productSchema = new Schema({
     salePrice:{
         type:Number,
         required:true,
-    },       
+    }, 
+    productOffer:{
+        type:Number,
+        default:0
+    },     
     stock:{
         type:Number,
         required:true,

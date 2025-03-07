@@ -3,6 +3,9 @@ const User= require('../../models/userSchema');
 const Product =require('../../models/productSchema');
 const Address=require('../../models/addressSchema');
 const Coupon = require('../../models/couponSchema');
+const Wallet =require('../../models/walletSchema');
+const ReferralOffer =require('../../models/referralOfferSchema');
+const Referral =require('../../models/referralSchema');
 
 const loadCheckoutPage = async (req, res) => {
     try {
@@ -18,11 +21,13 @@ const loadCheckoutPage = async (req, res) => {
             console.log("Error loading userData");
             return res.redirect("/signIn");
         }
+        
          //---fetching Cart
         const mycart= await Cart.findOne({userId:userData._id}).populate('items.productId');    
         if (!mycart){
-            return res.redirect("/shop"); 
             console.log('------no cart---------');
+            return res.redirect("/shop"); 
+            
         }  
         //---fetching address--
         const addressData= await Address.findOne({userId:userData._id});    
@@ -31,32 +36,43 @@ const loadCheckoutPage = async (req, res) => {
 
         }
        
-       
-        const orderItems=mycart.items.map(item=>({
-            product: item.productId._id, // Product ID
-            productName: item.productId.productName,   // Product Name
-            price: item.productId.regularPrice, // Product Price
-            quantity: item.quantity,    // Quantity
-            subtotal: item.quantity * item.productId.regularPrice, // Total for item
-        }));
+       //------fetching cart items-------------
+        const orderItems=mycart.items
+        .filter(item => item.productId.stock >= item.quantity)
+        .map(item=>({
+           
+                product: item.productId._id, // Product ID
+                productName: item.productId.productName,   // Product Name
+                price: item.productId.salePrice, // Product Price
+                quantity: item.quantity,    // Quantity
+                subtotal: item.quantity * item.productId.salePrice, // Total for item
+            }
+        ));
         const totalPrice = mycart.totalPrice; // Total price from cart   
+
+        //-------fetching available coupons---
        const coupons=await Coupon.find({            
-            minimumPrice:{$lt:mycart.totalPrice},
+            minimumPrice:{$lt:totalPrice},
             isActive:true,
-            expireOn:{$gt:new Date()},
-            _id: { $nin: userData.usedCoupons } 
+            startOn:{$lte:new Date()},
+            expireOn:{$gte:new Date()},
+           
         });
-        if(req.session.coupon){
-            // if (coupons.couponCode.includes(req.session.coupon.code)) 
-            //     coupons=coupons.filter((coupon)=>coupon.couponCode!=req.session.coupon.code);
+        if(coupons.length>0){
+            console.log('available coupons');
+            console.log(coupons);
+        }else{
+            console.log("no matched coupons");
+        }
+        if(req.session.coupon){           
                 discount=req.session.coupon.discount;            
         }        
-        res.render("checkout", { userData,addressData,orderItems,totalPrice,discount,coupons,deliveryPrice });
+        res.render("checkout", { userData,addressData,orderItems,totalPrice,discount,coupons,deliveryPrice});
        // res.render("checkout", { userData,addressData,cart:mycart,discount,coupons,deliveryFee });
         console.log(" checkout loaded");
     } catch (error) {
         console.error("Error loading checkout page:", error);
-        res.redirect("/error");
+        res.redirect("/pageNotFound");
     }
 };
 //----------------------------add Addressat checkout----------------
@@ -104,7 +120,7 @@ const applyCoupon =async(req,res)=>{
         const userId=req.session.user;
         const {couponCode}=req.body;
         console.log(couponCode);
-        const coupon= await Coupon.findOne({couponCode});
+        const coupon= await Coupon.findOne({couponCode:couponCode.trim()});
         if (!coupon || !coupon.isActive || coupon.expireOn < new Date()){
             console.log('invalid or expired Coupon');
             res.json({success: false,message:"Invalid coupon"})
@@ -119,9 +135,8 @@ const applyCoupon =async(req,res)=>{
         }
         if (user.usedCoupons.includes(coupon._id)) {
             return res.json({ success: false, message: "You have already used this coupon." });
-        }
-        
-       // await User.findByIdAndUpdate(userId, { $push: { usedCoupons: coupon._id } });
+        }       
+       
         req.session.coupon = {
             code: coupon.couponCode,
             discount: coupon.discountValue
@@ -137,9 +152,13 @@ const applyCoupon =async(req,res)=>{
 }
 
 
+
+
+
 module.exports={
     loadCheckoutPage,
     addAddressCheckOutForm,
     SaveCheckoutAddress,
-    applyCoupon
+    applyCoupon,
+   
 }

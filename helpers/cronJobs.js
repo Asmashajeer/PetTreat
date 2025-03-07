@@ -6,7 +6,7 @@ const Coupon = require("../models/couponSchema");  // Adjust path if needed
 cron.schedule("0 0 * * *", async () => {
     try {
         const result = await Coupon.updateMany(
-            { expireDate: { $lt: new Date() }, isActive: true,isExpired:false },
+            { expireOn: { $lt: new Date() }, isActive: true,isExpired:false },
             { $set: { isActive: false ,isExpired:true} }
         );
         console.log(`${result.modifiedCount} expired coupons deactivated.`);
