@@ -150,7 +150,7 @@ const createOrder= async(req,res)=>{
 async function verifyPayment(req,res){
     try{
         const userId=req.session.user;
-        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
         const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET);
         hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
         const generatedSignature = hmac.digest("hex");
@@ -200,6 +200,7 @@ async function reduceStockOnOrder (userId,orderId){
     }
                                     //----------empty the cart------------
     const emptyCart=await Cart.findOneAndDelete({userId:userId });
+    req.session.cartSize=0;
     console.log("removed Cart items");
     if(!emptyCart){
         console.log("error while removing Cart items");
@@ -254,33 +255,70 @@ const orderFailed= async (req,res)=>{
 }
 //----------------------------order retry-------------
 const retryPayment= async(req,res)=>{
-    const userId=req.session.user;
-    const user=await User.findById(userId);
-    const orderId=req.params.id;
-    console.log(orderId);
-    const order=await Order.findOne({orderId:orderId});  
-    console.log('order',order);
-    if (!order) {
-        console.log("Order not found");
-        return res.status(404).json({ message: "Order not found" });
+    try{
+        const userId=req.session.user;
+        const user=await User.findById(userId);
+        const orderId=req.params.id;
+        console.log('orderId---',orderId);
+        const order=await Order.findOne({orderId:orderId});  
+        console.log('order----',order);
+        if (!order) {
+            console.log("Order not found");
+            return res.json({success:false, message: "Order not found" });
+        }
+        if(order.paymentStatus!=='Pending' || order.paymentMethod!=='razorpay'){
+            console.log("Retry forthis order not possilble");
+            return res.json({message:"Retry forthis order not possilble"});
+        }
+        const options = {
+            amount: order.orderPrice*100, 
+            currency:'INR',
+            receipt:order.receipt,
+        };
+        const razorPayOrder = await razorpay.orders.create(options);
+        console.log("Razor Pay Order Created   ---",razorPayOrder);
+        return res.json({success:true,message:"Razor Pay Order Created",user:user, orderDetails:razorPayOrder,currOrderId:orderId});
     }
-    if(order.paymentStatus!=='Pending' || order.paymentMethod!=='razorpay'){
-        console.log("Retry forthis order not possilble");
-        return res.json({message:"Retry forthis order not possilble"});
+    catch(error){
+        console.log("error While retry payment",error);
+        res.json({success:false,message:error});
     }
-    const options = {
-        amount: order.orderPrice*100, 
-        currency:'INR',
-        receipt:order.receipt,
-    };
-    const razorPayOrder = await razorpay.orders.create(options);
-    order.orderId=razorPayOrder.id;
-    await order.save();
-    console.log("Razor Pay Order Created");
-    return res.status(200).json({message:"Razor Pay Order Created",user:user, orderDetails:razorPayOrder});
     
 }
 
+//------------------order Verification-------------
+async function verifyRetryPayment(req,res){
+    try{
+        const userId=req.session.user;
+        console.log(req.body);
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature,currOrderId} = req.body;
+        console.log(`inside verifyRetryPayment--------   ${currOrderId}`);
+        const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET);
+        hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
+        const generatedSignature = hmac.digest("hex");
+
+        const order = await Order.findOne({orderId:currOrderId})
+
+        if (generatedSignature === razorpay_signature  && order) {
+           
+           console.log("Order placed successfully'");
+           reduceStockOnOrder (userId,order.orderId);
+           await Order.findOneAndUpdate({orderId:order.orderId},{$set:{paymentStatus:'Paid'}});
+          return res.json({ success: true, message: "Order placed successfully!" ,redirect:`/orderSuccess?id=${order.orderId}`});
+
+
+        } else {
+            console.log("Orderpayment Failed");
+            await Order.findOneAndUpdate({orderId:order.orderId},{$set:{paymentStatus:'Pending'}});
+            return res.json({ success: false, message: "Payment failed. Kindly check  and re-submit your order.",redirect:`/orderFailed?id=${order.orderId}` });
+           
+        }
+
+    }catch(error){
+        console.log(error.message);
+        res.status(500).json({message:'Internal Server Error',error:error.message})
+    }
+}
 
 
 
@@ -611,6 +649,7 @@ module.exports={
     orderSuccess,
     orderFailed,
     retryPayment,
+    verifyRetryPayment,
     detailedOrderView,
     cancelOrder,
     cancelAnItem,

@@ -6,6 +6,7 @@ const User = require('../../models/userSchema');
 const loadShopping= async(req,res)=>{
     try {
         const user=req.session.user;
+        const cartSize=req.session.cartSize;
        
         if(user){
                 const userData= await User.findOne({_id:user})
@@ -21,7 +22,7 @@ const loadShopping= async(req,res)=>{
        if(categoryId){
             query.category=categoryId;
         }  
-        const productData=await Product.find(query);
+        const productData=await Product.find(query).populate('category');
        
          //-----for ajax call-------------------   
                 if (req.xhr || req.headers.accept.indexOf('json') > -1) {
@@ -31,7 +32,7 @@ const loadShopping= async(req,res)=>{
                  
                 if(user){
                     const userData= await User.findOne({_id:user})
-                   return  res.render('shop',{user:userData,products:productData,category: categories});            
+                   return  res.render('shop',{user:userData,products:productData,category: categories,cartSize,wList:req.session.wList});            
                 }else{
                   
                     return res.render('shop',{products:productData,category: categories});
@@ -50,10 +51,10 @@ const productDetails=async (req,res)=>{
             const userData= await User.findById(userId);
             const productId=req.query.id;
             const productData=await Product.findById({_id:productId}).populate('category');
-           
+
             const category = await Category.find({isListed:true});
             if(userData){
-                 res.render('productDetails',{user:userData,product:productData,category:category});
+                 res.render('productDetails',{user:userData,product:productData,category:category,cartSize:req.session.cartSize,wList:req.session.wList});
             }else
                 res.render('productDetails',{product:productData,category:category});
     } catch (error) {
@@ -149,7 +150,7 @@ const categorisedProducts= async(req,res)=>{
             
         if(user){
             const userData= await User.findOne({_id:user})
-            return  res.render('categorised',{user:userData,products:productData, category:categories,currentCategory:currentCategory});            
+            return  res.render('categorised',{user:userData,products:productData, category:categories,currentCategory:currentCategory,cartSize:req.session.cartSize,wList:req.session.wList});            
         }else{                  
             return res.render('categorised',{products:productData,category:categories,currentCategory:currentCategory});
         }  

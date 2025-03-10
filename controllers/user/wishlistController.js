@@ -21,12 +21,14 @@ const addWishlist=async(req,res)=>{
 
             });
             await wishlist.save();
+            req.session.wList=wishlist.products.length;
             console.log("pwishlist  added");
             return res.status(200).json({success:true,product:product.productName});
 
         }else{
             wishlist.products.push({productId});
             await wishlist.save();
+            req.session.wList=wishlist.products.length;
             console.log("wishlist  added");
             return res.status(200).json({success:true,product:product.productName});
         }
@@ -57,7 +59,7 @@ const removeFromwishlist = async (req,res)=>{
     try {
         const userId=req.session.user;
         const productIdtoDelete= req.params.id;
-        const wishlist= await Wishlist.findOne({userId:userId});
+        let wishlist= await Wishlist.findOne({userId:userId});
         const productToDelete=wishlist.products.find(product=>product.productId.toString()===productIdtoDelete.toString());
         if(!productToDelete){
             console.log("productNot foundin in wishlist");
@@ -68,6 +70,8 @@ const removeFromwishlist = async (req,res)=>{
         
         if(wishlistAfterDelete.modifiedCount>0){
             console.log("product deleted from wishlist");
+             wishlist= await Wishlist.findOne({userId:userId});
+            req.session.wList=wishlist.products.length;
              return res.redirect('/profile?tab=wishlist');
         }else{
             console.log("product cannot  remove from wishlist");

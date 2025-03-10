@@ -4,6 +4,7 @@ const Brand =require('../../models/brandSchema');
 const Product=require('../../models/productSchema');
 const Address= require('../../models/addressSchema');
 const Wallet = require('../../models/walletSchema');
+const Wishlist = require('../../models/wishlistSchema');
 const ReferralOffer= require('../../models/referralOfferSchema');
 
 const nodemailer =require('nodemailer');
@@ -106,9 +107,18 @@ const loadHomePage =async (req,res)=>{
     try{
       
         const user=req.session.user;
-       
+        let cartSize=0;
+        let wList=0;
+
         if(user){
                 const userData= await User.findOne({_id:user})
+                const cart= await Cart.findOne({userId:userData._id});
+                cartSize=cart?cart.items.length:0;                 
+                req.session.cartSize=cartSize;
+                const wishlist= await Wishlist.findOne({userId:userData._id});
+                wList=wishlist?wishlist.products.length:0;
+                req.session.wList=wList;
+
         }        
         const {categoryId}= req.query;
        
@@ -118,11 +128,13 @@ const loadHomePage =async (req,res)=>{
         const query={
             isBlocked:false,
             stock:{$gt:0}
-        };            
+        }; 
+       
+               
        if(categoryId){
             query.category=categoryId;
         }  
-        const productData=await Product.find(query).limit(limit);
+        const productData=await Product.find(query).populate('category').sort({createdAt:-1}).limit(limit);
        
          //-----for ajax call-------------------   
                 if (req.xhr || req.headers.accept.indexOf('json') > -1) {
@@ -132,10 +144,10 @@ const loadHomePage =async (req,res)=>{
                  
                 if(user){
                     const userData= await User.findOne({_id:user})
-                   return  res.render('home',{user:userData,products:productData,category: categories});            
+                   return  res.render('home',{user:userData,products:productData,category: categories,cartSize,wList});            
                 }else{
                   
-                    return res.render('home',{products:productData,category: categories});
+                    return res.render('home',{products:productData,category: categories,cartSize,wList});
                 }  
         
             

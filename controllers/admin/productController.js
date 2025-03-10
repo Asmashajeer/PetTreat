@@ -90,7 +90,7 @@ const addProduct=async(req,res)=>{
                     {productName:{$regex:'.*'+search+'.*'}},
                     {brand:{$regex:'.*'+search+'.*'}}                    
                 ],
-            }).sort({productName:1}).skip(skip).limit(limit*1).populate('category').exec();
+            }).sort({createdAt:-1}).skip(skip).limit(limit*1).populate('category').exec();
                       
 
             const count= await Product.find({
@@ -204,8 +204,16 @@ const updateProduct=async (req,res)=>{
                  status:status};
 
         if (req.files && req.files.length > 0) {
-        const productImages = req.files.map(file => file.filename);
-        updates.productImages = productImages; // Replace the old images
+            const newImages = req.files.map(file => file.filename);
+
+            if(product.productImages.length<3){
+                await Product.findByIdAndUpdate(id, {
+                    $push: { productImages: { $each:newImages } } // ✅ Append new images
+                }, { new: true });
+            }else{
+                product.productImages[product.productImages.length-1]=newImages;
+            }   
+        // updates.productImages = productImages; // Replace the old images
         }
               
         const updatedProduct = await Product.findByIdAndUpdate(id, updates, { new: true });

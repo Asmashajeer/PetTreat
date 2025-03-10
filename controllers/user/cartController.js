@@ -14,7 +14,7 @@ const showCart=async(req,res)=>{
         const myCart= await Cart.findOne({userId:userId}).populate('items.productId');
         if(!myCart||myCart.items.length===0){            
             console.log("cart is empty");
-            return res.render('shopingCart');
+            return res.render('shopingCart',{cartSize:req.session.cartSize});
         }
         for(let item of myCart.items){    //remove item which is outof stock from cart
             const currentProduct=await Product.findOne({_id:item.productId._id});
@@ -41,8 +41,8 @@ const showCart=async(req,res)=>{
                
             }      
         }      
-
-        res.render('shopingCart',{cart:myCart,user:user});
+        req.session.cartSize=myCart.items.length;
+        res.render('shopingCart',{cart:myCart,user:user,cartSize:req.session.cartSize,wList:req.session.wList});
    } catch (error) {
         console.error("unable fetch from Cart",error);
         res.status(500).redirect('/pageNotFound');
@@ -57,6 +57,7 @@ const addToCart =async(req,res)=>{
     try {
         const userId= req.session.user;
         const pId = req.body.productId;
+        cartSize=0;
         const quantity = parseInt(req.body.quantity);
         console.log('pId :',pId,'quantity  :  ',quantity);
        if(!userId){
@@ -123,8 +124,10 @@ const addToCart =async(req,res)=>{
        
         }
         req.session.cart=cart;
+        req.session.cartSize=cart.items.length;
+        cartSize=req.session.cartSize;
         console.log("Addedto cart");
-        return res.json({success:true,message:"Added to Cart",cart});
+        return res.json({success:true,message:"Added to Cart",cart,cartSize});
         
     } catch (error) {
         console.error("unable to add to Cart",error);
@@ -163,8 +166,9 @@ const removeOne=async(req,res)=>{
                 let cart= await Cart.findOne({userId:userId,
                     items:{$elemMatch:{productId:id}}
                  }); 
-                
-                return res.status(200).json({success:true, message: "cart updated successfully",cart });
+                req.session.cartSize=cart.items.length;
+                 cartSize=req.session.cartSize;
+                return res.status(200).json({success:true, message: "cart updated successfully",cart,cartSize });
             }else {
                 console.log("error updating cart");
                 return res.status(500).json({ success: false,message: "changes to cart failed", error });

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Details</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body >
   
@@ -58,8 +58,10 @@
                     </div>
                     
                     <div class="d-grid gap-2">
-                        <a href=""  onclick="retrypayment('<%=orderData.orderId%>')" class="btn btn-primary">Try Payment Again</a>
-                        <a href="/shop" class="btn btn-outline-secondary">Return to Shop</a>
+                        <a href="#"  onclick="retrypayment(event,'<%=orderData.orderId%>')" class="btn btn-primary">Try Payment Again</a>
+                        <!-- <a href='/checkout?id=<%=orderData.orderId%>'   class="btn btn-primary">checkOut</a> -->
+                        <!-- <a href="/orders/cancelOrder/<%=order.orderId%>" onclick="return confirmation('Are you sure ,you want to Cancel Order?')" class="btn btn-outline-secondary">Cancel Order</a> -->
+                        <a href='/orders/detailedOrderView/<%=orderData.orderId%>'  onclick="retrypayment(event,'<%=orderData.orderId%>')" class="btn btn-primary"> View Order</a> 
                     </div>
                 </div>
             </div>
@@ -70,15 +72,20 @@
         </div>
     </div>
     <script>
-        async function retrypayment(orderId){
+        async function retrypayment(e,orderId){
+            e.preventDefault();
             try{  
                 console.log(orderId);
                 console.log('----------------');
                 const response = await fetch(`/retryPayment/${orderId}`);
                 const data= await response.json();        
-                alert(data.message) ;
-                if (data.orderDetails){
-                initializePayment(data.orderDetails,data.user);
+              
+                console.log(data.orderDetails);
+                console.log(`user ${data.user}`);
+                console.log(`orderId: ${data.currOrderId}`);
+
+                if(data.orderDetails){
+                    initializePayment(data.orderDetails,data.user,orderId);
                 }          
                 else{
                     alert(data.message || "Failed to place order.");
@@ -87,17 +94,18 @@
                     console.log(data);
                 }
             }catch (error) {
-                console.error(" Error retraying order:", error);
-                alert("An error occurred while retrying the order. Please try again.");
+                console.error(" Error retraying order:", error.message);
+                alert(`An error occurred while retrying the order. Please try again.${error.message}`);
             }    
         }
 
 
 
 
-    function initializePayment(order,user){
+    function initializePayment(order,user,currOrderId){
+        console.log(`inside initilaize---------------   ${currOrderId}`);
         var options = {
-            key:  process.env.RAZORPAY_KEY_ID ,
+            key: "<%= process.env.RAZORPAY_KEY_ID %>" ,
             amount: order.amount *100,
             currency: order.currency,
             name: "PetTreat food and Toys",
@@ -105,7 +113,7 @@
             order_id: order.id,
             handler: async function (response) {
                 try{
-                    const verifyResponse = await fetch("/orders/payment/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(response) });
+                    const verifyResponse = await fetch("/orders/retrypayment/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...response, currOrderId: currOrderId }) });
                     const data=await verifyResponse.json();
                     if(data.success)             
                         window.location.href = data.redirect;

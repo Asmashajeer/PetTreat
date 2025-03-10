@@ -25,6 +25,17 @@ router.get('/',adminAuth,adminController.loadDashboard);
 router.get('/dashboard',adminAuth,adminController.loadDashboard);
 router.get('/logout',adminController.logOut);
 
+
+//-----------------admin dashBoard------------------
+router.get('/dashboard/chart/:chartType',adminAuth,adminController.loadRevenueChart);
+router.get('/dashboard/monthlyChart',adminAuth,adminController.getChartData);
+
+
+
+
+
+
+
 //--------user Management-------------
 router.get('/users',adminAuth,customerController.customerInfo);
 router.get('/blockCustomer',adminAuth,customerController.customerBlocked);
@@ -75,8 +86,8 @@ router.get('/deleteCoupon/:id',adminAuth,couponController.deleteCoupon)
 router.get('/referralOffer',adminAuth,referralController.referralOfferPage);
 router.post('/addReferalOffer',adminAuth,referralController.addReferralOffer);
 router.get('/removeReferralOffer/:id',adminAuth,referralController.removeReferralOffer);
-//---------------order management----------------
 
+//---------------order management----------------
 router.get('/orders',adminAuth,orderController.loadOrders);
 router.get('/orders/EditOrderStatus/:id',adminAuth,orderController.viewOrder);
 router.post('/orders/changeOrderStatus/:id',adminAuth,orderController.changeOrderStatus);
@@ -86,5 +97,10 @@ router.post('/order/updateReturn',adminAuth,orderController.updateReturn);
 router.get('/salesReport',adminAuth,reportController.salesReportPage);
 router.get('/generateReport',adminAuth,reportController.generateReport);
 router.get('/exportAsPDF',adminAuth,reportController.generatePDFReport);
+
+
+
+
+
 
 module.exports=router;

@@ -1,39 +1,15 @@
 <%-include("../partials/admin/header") -%>
-<style>
-    body {
-      background-color: #f8f9fa;
-    }
-    .chart-container {
-      position: relative;
-      height: 250px;
-      width: 100%;
-    }
-    .card {
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s;
-    }
-    .card:hover {
-      transform: translateY(-5px);
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 5px;
-    }
-    .legend-color {
-      width: 12px;
-      height: 12px;
-      margin-right: 8px;
-      border-radius: 2px;
-    }
-  </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
   <!-- Main Content -->
   <div class="col-md-10 p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Dashboard Overview</h2>
-            
+            <div>
+                <button class="btn btn-primary">
+                    <i class="fas fa-download me-2"></i> Export Report
+                </button>
+            </div>
         </div>
 
     <!-- Total Sales, Orders, Users, Products Stats -->
@@ -93,7 +69,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="card-title text-muted">Total Users</h6>
-                            <h3 class="mb-0" ><%=Total.totalUsers%></h3>
+                            <h3 class="mb-0" ></h3><%=Total.totalUsers%></h3>
                         </div>
                         <div>
                             <i class="fas fa-users  text-success"></i>
@@ -133,71 +109,37 @@
     </div>
     
     <!-- Revenue Statistics Chart & Top Selling Products -->
-   
-    <div class="row">
-        <div class="col-12">
+    <div class="row mt-3">
+        <!-- Revenue Statistics Chart -->
+        <div class="col-md-6">
             <div class="card">
-            <div class="card-body d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Sales Performance </h5>
-                <div class="d-flex align-items-center">
-                <label for="timeFilter" class="me-2">Time Period:</label>
-                <select id="timeFilter" class="form-select form-select-sm" style="width: 150px;">
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly" selected>Yearly</option>
-                </select>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Revenue Statistics</h5>
+                    <div class="btn-group" role="group">    
+                        <button type="button" class="btn btn-sm btn-outline-secondary active">Daily</button>                    
+                        <button type="button" class="btn btn-sm btn-outline-secondary">Weekly</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary">Monthly</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary">Yearly</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" height="250"></canvas>
                 </div>
             </div>
+        </div>      
+        <!-- top selling product chart -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Top Selling Products</h5>
+                </div> 
+                <div class="card-body"></div>  
+                    <!-- Chart.js Pie Chart -->
+                    <canvas id="topSellingChart"  height="250"></canvas>
+                </div>    
             </div>
         </div>
     </div>
-    <div class="row">
-        <!-- Best Selling Products -->
-        <div class="col-md-4 mb-4">
-          <div class="card h-100">
-            <div class="card-header ">
-              <h6 class="card-title text-center mb-0">Best Selling Products</h6>
-            </div>
-            <div class="card-body">
-              <div class="chart-container">
-                <canvas id="productChart"></canvas>
-              </div>
-              <div id="productLegend" class="mt-3"></div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Best Selling Categories -->
-        <div class="col-md-4 mb-4">
-          <div class="card h-100">
-            <div class="card-header ">
-              <h6 class="card-title text-center mb-0">Best Selling Categories</h6>
-            </div>
-            <div class="card-body">
-              <div class="chart-container">
-                <canvas id="categoryChart"></canvas>
-              </div>
-              <div id="categoryLegend" class="mt-3"></div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Best Selling Brands -->
-        <div class="col-md-4 mb-4">
-          <div class="card h-100">
-            <div class="card-header ">
-              <h6 class="card-title text-center mb-0">Best Selling Brands</h6>
-            </div>
-            <div class="card-body">
-              <div class="chart-container">
-                <canvas id="brandChart"></canvas>
-              </div>
-              <div id="brandLegend" class="mt-3"></div>
-            </div>
-          </div>
-        </div>
-    </div>
-
-   
 </div>
     
     <!-- Recent Orders  -->
@@ -269,10 +211,10 @@
                         <%topSellingProducts.forEach(product=>{%>
                             <div class="list-group-item p-1 d-flex align-items-center">                            
                                 <div class="flex-grow-1">
-                                    <p class="mb-0"><strong><%=product.productName%></strong></p>
+                                    <p class="mb-0"><strong><%=product.productInfo.productName%></strong></p>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <small class="text-muted"><%=product.totalQuantitySold%></small>
-                                       
+                                        <span class="fw-normal">₹<%=product.productInfo.regularPrice.toFixed(2)%></span>
                                     </div>
                                     
                                 </div>
@@ -346,111 +288,206 @@
 
 <!-- Chart initialization -->
 <script>
-    document.addEventListener('DOMContentLoaded', async function() {     
-    
-    try{
-        const response= await fetch('/admin/dashboard/monthlyChart');
-        const data=await response.json();
-        console.log(data);
-        initCharts(data)
+    // <!-- total revenue Chart initialization -->
+    // Select buttons correctly
+    const dailyButton = document.querySelector('.btn-outline-secondary:nth-child(1)');
+    const weeklyButton = document.querySelector('.btn-outline-secondary:nth-child(2)');
+    const monthlyButton = document.querySelector('.btn-outline-secondary:nth-child(3)');
+    const yearlyButton = document.querySelector('.btn-outline-secondary:nth-child(4)');
+    // Initialize the Chart.js chart
+    const ctx = document.getElementById('revenueChart').getContext('2d');
 
-    }catch(error){
-        console.log("errror fetching data",error);
-
-    }
-
-});
-     // Chart colors
-     const chartColors = [
-      '#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6', 
-      '#1abc9c', '#d35400', '#34495e', '#16a085', '#c0392b'
-    ];
-
-    // Chart instances
-    let productChart, categoryChart, brandChart;
-
-    // Initialize charts
-    function initCharts(data) {
-      //--- Product chart
-      const productCtx = document.getElementById('productChart').getContext('2d');
-      productChart = createPieChart(productCtx, data.products, 'productLegend');
-
-      //---Category chart
-      const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-      categoryChart = createPieChart(categoryCtx, data.categories, 'categoryLegend');
-
-      // Brand chart
-      const brandCtx = document.getElementById('brandChart').getContext('2d');
-      brandChart = createPieChart(brandCtx, data.brands, 'brandLegend');
-    }
-
-    // Create pie chart
-    function createPieChart(ctx, data, legendId) {
-      const names = data.map(item => item.name);
-      const values = data.map(item => item.totalQtySold);
-      
-      const chart = new Chart(ctx, {
-        type: 'pie',
+    let salesChart = new Chart(ctx, {
+        type: 'bar', 
         data: {
-          labels: names,
-          datasets: [{
-            data: values,
-            backgroundColor: chartColors.slice(0, data.length),
-            borderColor: 'white',
-            borderWidth: 1
-          }]
+            labels: [],
+            datasets: [{
+                label: 'Revenue',
+                data: [],  
+                borderColor: '#4bc07e',
+                backgroundColor: '#4bc07e',
+                fill: false,
+            }]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const label = context.label || '';
-                  const value = context.raw || 0;
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                  const percentage = Math.round((value / total) * 100);
-                  return `${label}: ${value} (${percentage}%)`;
+            responsive: true,
+            scales: {
+                x: {
+                    title: { display: true, text: 'Time Period' }
+                },
+                y: {
+                    title: { display: true, text: 'Revenue (₹)' }
                 }
-              }
             }
-          }
         }
-      });
-      // Create custom legend
-      createCustomLegend(data, legendId, chartColors);
-      
-      return chart;
+    });
+  // Initializetop selling products Chart.js
+    const topsale = document.getElementById("topSellingChart").getContext('2d');
+    let topProductChart=new Chart(topsale, {
+        type: 'pie', 
+        data: {
+            labels: productNames, // X-axis labels (product names)
+            datasets: [{
+                label: "unit Sold",
+                data: [], // Y-axis data (units sold)
+                backgroundColor: [
+                    "rgba(75, 192, 192, 0.6)", // Color for each slice
+                    "rgba(153, 102, 255, 0.6)",
+                    "rgba(255, 159, 64, 0.6)",
+                    "rgba(54, 162, 235, 0.6)",
+                    "rgba(255, 99, 132, 0.6)"
+                ],
+                borderColor: [
+                    "rgba(75, 192, 192, 1)", 
+                    "rgba(153, 102, 255, 1)",
+                    "rgba(255, 159, 64, 1)",
+                    "rgba(54, 162, 235, 1)",
+                    "rgba(255, 99, 132, 1)"
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            
+            }
+        }
+    });
+    // Fetch revenue data from server
+    async function fetchRevenue(chartType) {
+        try {
+            console.log(`Fetching revenue for: ${chartType}`); 
+            const response = await fetch(`/admin/dashboard/chart/${chartType}`);
+            const data = await response.json();
+            if (!data.length) {
+                console.warn("No data found, using test data!");
+                updateChart(['No Data'], [0]);
+                return;
+            }
+            const labels = data.map(entry => entry._id);
+            const revenueData = data.map(entry => entry.totalRevenue);
+            updateChart(labels, revenueData);
+
+        } catch (error) {
+            console.error("Error fetching revenue data:", error);
+        }
     }
-    function createCustomLegend(data, legendId, colors) {
-      const legendContainer = document.getElementById(legendId);
-      legendContainer.innerHTML = '';
-      
-      const total = data.reduce((sum, item) => sum + item.totalQtySold, 0);
-      
-      data.forEach((item, index) => {
-        const percentage = ((item.totalQtySold / total) * 100).toFixed(1);
-        const legendItem = document.createElement('div');
-        legendItem.className = 'legend-item';
-        
-        const colorBox = document.createElement('div');
-        colorBox.className = 'legend-color';
-        colorBox.style.backgroundColor = colors[index];
-        
-        const text = document.createElement('span');
-        text.className = 'small';
-       
-        text.textContent = `${item.name} - ${percentage}%`;
-        
-        legendItem.appendChild(colorBox);
-        legendItem.appendChild(text);
-        legendContainer.appendChild(legendItem);
-      });
+
+    // Function to update the chart data
+    function updateChart(labels, data) {
+        salesChart.data.labels = labels;
+        salesChart.data.datasets[0].data = data;
+        salesChart.update();
     }
+
+    // Function to set the active button
+    function setActiveButton(activeButton) {
+        dailyButton.classList.remove('active');
+        weeklyButton.classList.remove('active');
+        monthlyButton.classList.remove('active');
+        yearlyButton.classList.remove('active');
+        activeButton.classList.add('active');
+    }
+
+    // Button event listeners
+    dailyButton.addEventListener('click', function () {
+        fetchRevenue('daily');
+        setActiveButton(dailyButton);
+    });
+
+    weeklyButton.addEventListener('click', function () {
+        fetchRevenue('weekly');
+        setActiveButton(weeklyButton);
+    });
+
+    monthlyButton.addEventListener('click', function () {
+        fetchRevenue('monthly');
+        setActiveButton(monthlyButton);
+    });
+
+    yearlyButton.addEventListener('click', function () {
+        fetchRevenue('yearly');
+        setActiveButton(yearlyButton);
+    });
+    // Fetch daily revenue on page load
+    fetchRevenue("daily");
+    setActiveButton(dailyButton); //  Mark the daily button as active
+
+
+
+
+    //----------------top selling product chart----------
+    async function topSellingproducts(){
+        try{
+            const response=await fetch("/admin/top-selling-products");
+            const data= response.json();
+            if (!data.length) {
+                console.warn("No data found, using test data!");
+                topProductChart.data.labels = [];
+                topProductChart.data.datasets[0].data = [0];
+                topProductChart.update();               
+                return;
+            }
+                // Prepare data for the chart
+                console.log(data);
+               const productNames = data.map(item => item.productName);
+               const  totalSold = data.map(item => item.totalQuantitySold);
+                console.log(productNames,totalSold)
+
+                topProductChart.data.labels = productNames;
+                topProductChart.data.datasets[0].data = totalSold;
+                topProductChart.update();
+
+                    // Initialize Chart.js
+                // const topsale = document.getElementById("topSellingChart").getContext('2d');
+                // let topChart=new Chart(topsale, {
+                //     type: 'pie', 
+                //     data: {
+                //         labels: productNames, // X-axis labels (product names)
+                //         datasets: [{
+                //             label: "Units Sold",
+                //             data: totalSold, // Y-axis data (units sold)
+                //             backgroundColor: [
+                //                 "rgba(75, 192, 192, 0.6)", // Color for each slice
+                //                 "rgba(153, 102, 255, 0.6)",
+                //                 "rgba(255, 159, 64, 0.6)",
+                //                 "rgba(54, 162, 235, 0.6)",
+                //                 "rgba(255, 99, 132, 0.6)"
+                //             ],
+                //             borderColor: [
+                //                 "rgba(75, 192, 192, 1)", 
+                //                 "rgba(153, 102, 255, 1)",
+                //                 "rgba(255, 159, 64, 1)",
+                //                 "rgba(54, 162, 235, 1)",
+                //                 "rgba(255, 99, 132, 1)"
+                //             ],
+                //             borderWidth: 1
+                //         }]
+                //     },
+                //     options: {
+                //         responsive: true,
+                //         plugins: {
+                //             legend: {
+                //                 position: 'top',
+                //             }
+                        
+                //         }
+                //     }
+                // });
+                
+               
+        }    
+        catch(error){
+            console.error("Error fetching data:", error);
+        } 
+    }   
+
+
+    topSellingproducts();
 </script>
 
 

@@ -132,7 +132,7 @@ const userProfile= async(req,res)=>{
           referralCode= userData.referralCode;
          }
            
-       res.render('profile',{user:userData,selectedTab,userAddress:addressData,orderData:orderData,wishlist:wishlist,wallet:wallet,moment,referralCode});      
+       res.render('profile',{user:userData,selectedTab,userAddress:addressData,orderData:orderData,wishlist:wishlist,wallet:wallet,moment,referralCode,cartSize:req.session.cartSize,wList:req.session.wList});      
     }else{
        console.error("unable to fetch user data");
     }

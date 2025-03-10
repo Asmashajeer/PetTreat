@@ -5,11 +5,14 @@
     <title>Pet Treat</title>
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="description" content="">
-   
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
     <meta property="og:image" content="">
     <link rel="shortcut icon" type="image/x-icon" href="#">
-    <link href="/admin-assets/css/main.css"rel="stylesheet" type="text/css" />
-     <!-- <link href="/public/css/header.css" rel="stylesheet" type="text/css" />  -->
+    <link href="/admin-assets/css/main.css" rel="stylesheet" type="text/css" />
+    <!-- <link href="/public/css/header.css" rel="stylesheet" type="text/css" /> -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.6/dist/sweetalert2.min.css">
  <!-- Font Awesome Icons for delete/edit -->
  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"> -->
@@ -20,14 +23,8 @@
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 <style>
-:root {
-    --primary-color: #dead65;
-    --primary-light: #e1ce94;
-    --primary-dark: #c28e35;
-}
-
 body {
-    background-color: #dead65;
+    background-color: #c0baba;
 }
 .navbar {
     background-color: #343432;
@@ -42,7 +39,7 @@ body {
 
 .menu-item a.menu-link:hover,
 .menu-item a.menu-link.active {
-    background-color: #dead65; 
+    background-color: #6e7e6e; 
     color: #ffffff;
 }
 .dropdown-menu {
@@ -71,35 +68,6 @@ body {
 .custom-header {
             background-color: #dead65;
 }
-.card {
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-}
-        
-.card-header {
-    background-color: var(--primary-light);
-    border-bottom: none;
-    border-radius: 10px 10px 0 0 !important;
-}
-
-.card-footer {
-    background-color: #f8f9fa;
-    border-top: none;
-}
-
-.stat-card {
-    border-left: 5px solid var(--primary-color);
-}
-
-.table-hover tbody tr:hover {
-    background-color: var(--primary-light);
-}
-
-.progress-bar {
-    background-color: var(--primary-color);
-}
-
 .error-message {
       color: red;
       font-size: 0.9rem;
@@ -108,7 +76,7 @@ body {
 </style>
 </head>
 <body>
-    <!-- <div class="screen-overlay"></div> -->
+    <div class="screen-overlay"></div>
     <aside class="navbar-aside col-md-2" id="offcanvas_aside">
         <div class="aside-top">
             <a href="#" class="brand-wrap">
@@ -121,7 +89,7 @@ body {
         <nav > 
             <ul class="menu-aside">
                 <li class="menu-item">
-                    <a class="menu-link" href="/admin"> <i class="icon material-icons md-home"></i>
+                    <a class="menu-link" href="/admin/dashboard"> <i class="icon material-icons md-home"></i>
                         <span class="text">Dashboard</span>
                     </a>
                 </li>
@@ -174,7 +142,8 @@ body {
             </ul>
         </nav>
     </aside>
-        <header class="main-header navbar ">
+    <main class="main-wrap">
+        <header class="main-header navbar">
             <div class="col-search">
             </div>
             <div class="col-nav">
@@ -190,4 +159,3 @@ body {
                 </ul>
             </div>
         </header>
-        <main class="main-wrap mt-2">

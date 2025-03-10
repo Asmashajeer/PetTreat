@@ -101,6 +101,7 @@ router.post('/orders/payment/verify',userAuth,orderController.verifyPayment);
 router.get('/orderSuccess',userAuth,orderController.orderSuccess);
 router.get('/orderFailed/:id',userAuth,orderController.orderFailed);
 router.get('/retryPayment/:id',userAuth,orderController.retryPayment);
+router.post('/orders/retrypayment/verify',userAuth,orderController.verifyRetryPayment);
 router.get('/orders/detailedOrderView/:id',userAuth,orderController.detailedOrderView);
 router.put('/order/cancelAnItem',userAuth,orderController.cancelAnItem);
 router.get('/orders/cancelOrder/:id',userAuth,orderController.cancelOrder);

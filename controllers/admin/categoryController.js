@@ -154,7 +154,7 @@ const addCategoryOffer=async(req,res)=>{
         await Category.updateOne({_id:categoryId},{$set:{categoryOffer:percentage}});
         for(let product of products){
             product.productOffer=0;
-            product.salePrice=product.regularPrice;
+            product.salePrice-=Math.floor(product.regularPrice*(percentage/100));
             await product.save();
         }
         res.json({status:true});
