@@ -7,8 +7,7 @@ const ledgerSchema = new Schema({
         required: true
     },
     orderId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Order",
+        type: String,
         default: null
     },
     userId: {
@@ -27,7 +26,7 @@ const ledgerSchema = new Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ["COD", "Card", "Razorpay", "Wallet", "Refund","Referal"],
+        enum: ["COD", "Card", "razorpay", "wallet", "Refund","Referal"],
         required: true
     },
     description: {

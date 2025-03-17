@@ -27,10 +27,13 @@
     </style>
 </head>
 
-<body>
-    <div class="container mt-5">
-        <h3 class="text-center mb-4">All Products</h3>
+<body class="bg-custom">
+    
 
+    <div class="card mt-1">
+        <div class="card-header mb-4">
+            <h3 class="text-center ">All Products</h3>
+        </div>
         <!-- Add Product Button and Search Bar -->
         <div class="d-flex justify-content-between mb-4">
             <div>
@@ -39,9 +42,8 @@
                         <input type="text" class="form-control border-0 rounded-pill" placeholder="Search products or brands" name="search">
                         <button class="btn  border-0" type="submit">Search</button>
                     </div>
-                </form>
-            
-                <!-- <input type="text" class="form-control" id="search" placeholder="Search by Product Name..." style="width: 300px;"> -->
+                </form>            
+                
             </div>
             <div>
                 <button class="btn btn-outline-success " style="color:#101110" onclick="window.location.href='/admin/addProduct'">
@@ -80,7 +82,7 @@
                    <td><%=product.productOffer%>%</td>
                    <td>
                     <%if(product.productOffer===0){%>
-                        <a  href="#" onclick="addOffer('<%=product._id%>')" class="btn  btn-sm btn-outline-success " style="width: 70px">AddOffer</a>
+                        <a  href="#" onclick="addOffer('<%=product._id%>')" class="btn  btn-sm btn-outline-success " style="width: 70px">Add Offer</a>
                     <%}else{%>
                         <a  href="#" onclick="removeOffer('<%=product._id%>')" class="btn btn-sm btn-outline-danger " style="width: 70px">Remove</a>
                     <%}%>
@@ -110,34 +112,20 @@
         </table>
 
         <!-- Pagination -->
-        <nav>
-            <ul class="pagination">
-                <%if (currentPage>1){%>
-                    <li class="page-item">
-                        <a class="page-link" href="?page=<%= currentPage-1 %>"  aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>                    
-                <%}%>
-                 <%for(let i=1;i<=totalPages;i++){%> 
-                 
-                    <%if(i==currentPage){%>
-                        <li class="page-item">   
-                          <span  class="page-link " href=""><%= i %></span></a> 
-                    <%}else{%>
-                        <li class="page-item" >
-                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-                        </li>
-                <%}}%>
-                <%if (currentPage<totalPages){%>
-                    <li class="page-item">
-                        <a class="page-link" href="?page=<%= currentPage+1 %>" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                <% }%>       
-            </ul>
-        </nav>
+        <div class="pagination d-flex justify-content-center pb-2">
+            <%if (currentPage>1){%>
+                <a href="?page=<%= currentPage-1 %>">&laquo;</a>
+            <%}%>
+             <%for(let i=1;i<=totalPages;i++){%> 
+                <%if(i==currentPage){%>
+                    <span  class="current-page bg-custom "><%= i %></span>
+                <%}else{%>
+                    <a href="?page=<%= i %>"><%= i %></a>
+            <%}}%>
+            <%if (currentPage<totalPages){%>
+                <a href="?page=<%= currentPage+1 %>"> &raquo; </a>
+            <% }%>      
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>

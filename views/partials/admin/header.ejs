@@ -7,6 +7,7 @@
     <meta name="description" content="">
    
     <meta property="og:image" content="">
+    <link rel="icon" type="image/png" href="images/icons/favicon.png"/>
     <link rel="shortcut icon" type="image/x-icon" href="#">
     <link href="/admin-assets/css/main.css"rel="stylesheet" type="text/css" />
      <!-- <link href="/public/css/header.css" rel="stylesheet" type="text/css" />  -->
@@ -22,12 +23,20 @@
 <style>
 :root {
     --primary-color: #dead65;
-    --primary-light: #e1ce94;
+    --primary-light: #807f7b;
     --primary-dark: #c28e35;
 }
-
+.bg-custom{
+     background-color: #ecd5b1
+}
+.bg-transparent{
+    background-color:transparent !important ;
+}
+.text-custom{
+     color:#dead65!important;
+}
 body {
-    background-color: #dead65;
+    background-color: #ecd5b1;
 }
 .navbar {
     background-color: #343432;
@@ -46,9 +55,11 @@ body {
     color: #ffffff;
 }
 .dropdown-menu {
-    background-color: #fefefe;
+    background-color: #2d2c2c;    
 }
-
+.dropdown-item{
+    color:#dead65 !important;
+}
 .dropdown-item:hover {
     background-color: #33053d;
     color: #ffffff;
@@ -80,6 +91,7 @@ body {
 .card-header {
     background-color: var(--primary-light);
     border-bottom: none;
+    color:#ffffff;
     border-radius: 10px 10px 0 0 !important;
 }
 
@@ -104,22 +116,45 @@ body {
       color: red;
       font-size: 0.9rem;
  }
- 
+ .pagination-container {
+      text-align: center;
+    }
+
+    .pagination {
+      display: inline-block;
+    }
+
+    .pagination a,
+    .pagination .current-page {
+      
+      padding: 5px 10px;
+      margin: 0 2px;
+      border: 1px solid #ddd;
+      text-decoration: none;
+      color: #333;
+      justify-content: center;
+    
+    }
+
+    .pagination a:hover {
+      background-color: #f5f5f5;
+    }
+
 </style>
 </head>
 <body>
     <!-- <div class="screen-overlay"></div> -->
-    <aside class="navbar-aside col-md-2" id="offcanvas_aside">
-        <div class="aside-top">
+    <aside class="navbar-aside col-md-2 border-0" id="offcanvas_aside">
+        <div class="aside-top border-0">
             <a href="#" class="brand-wrap">
-                <img src="images\icons\Pet_treatLogo.png"   class="logo" alt="pet Treat">
+                <img src="/images/icons/Pet_treatLogo4DarkBG.png" alt="petTreat-Logo">
             </a>
             <div>
                 <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i> </button>
             </div>
         </div>
         <nav > 
-            <ul class="menu-aside">
+            <ul class="menu-aside ">
                 <li class="menu-item">
                     <a class="menu-link" href="/admin"> <i class="icon material-icons md-home"></i>
                         <span class="text">Dashboard</span>
@@ -154,11 +189,11 @@ body {
                 </li>
                 <li class="menu-item">
                     <a class="menu-link" href="/admin/referralOffer"> <i class="icon material-icons md-photo_size_select_actual"></i>
-                        <span class="text">Referral Program</span> </a>
+                        <span class="text">ReferralProgram</span> </a>
                 </li>
                 <li class="menu-item">
-                    <a class="menu-link" href="/admin/banner"> <i class="icon material-icons md-photo_size_select_actual"></i>
-                        <span class="text">Banner</span> </a>
+                    <a class="menu-link" href="/admin/transactions"> <i class="icon  fas fa-exchange-alt"></i></i>
+                        <span class="text">Transactions</span> </a>
                 </li>
 
                 <li class="menu-item">
@@ -177,14 +212,14 @@ body {
         <header class="main-header navbar ">
             <div class="col-search">
             </div>
-            <div class="col-nav">
+            <div class="col-nav mr-5 pr-5">
                 <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> </i> </button>
-                <ul class="nav">
-                    <li class="dropdown nav-item">
-                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <i class="fas fa-user"></i> Admin</a>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
+                <ul class="nav mr-5 pr-5">
+                    <li class="dropdown nav-item ">
+                        <a class="dropdown-toggle text-custom" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <i class="fas fa-user"></i> Admin</a>
+                        <div class="dropdown-menu dropdown-menu-end mr-5" aria-labelledby="dropdownAccount">
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item " href="/admin/logout"><i class="material-icons md-exit_to_app"></i>Logout</a>
+                            <a class="dropdown-item text-white " href="/admin/logout"><i class="material-icons md-exit_to_app"></i>Logout</a>
                         </div>
                     </li>
                 </ul>

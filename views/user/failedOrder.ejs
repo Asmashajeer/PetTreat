@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Details</title>
+    <link rel="stylesheet" type="text/css" href="css/header.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
@@ -60,8 +61,8 @@
                     <div class="d-grid gap-2">
                         <a href="#"  onclick="retrypayment(event,'<%=orderData.orderId%>')" class="btn btn-primary">Try Payment Again</a>
                         <!-- <a href='/checkout?id=<%=orderData.orderId%>'   class="btn btn-primary">checkOut</a> -->
-                        <!-- <a href="/orders/cancelOrder/<%=order.orderId%>" onclick="return confirmation('Are you sure ,you want to Cancel Order?')" class="btn btn-outline-secondary">Cancel Order</a> -->
-                        <a href='/orders/detailedOrderView/<%=orderData.orderId%>'  onclick="retrypayment(event,'<%=orderData.orderId%>')" class="btn btn-primary"> View Order</a> 
+                        <!-- <a href="/orders/cancelOrder/<%=orderData.orderId%>" onclick="return confirmation('Are you sure ,you want to Cancel Order?')" class="btn btn-outline-secondary">Cancel Order</a> -->
+                        <a href='/orders/detailedOrderView/<%=orderData.orderId%>' class ="btn-secondary" > View Order</a> 
                     </div>
                 </div>
             </div>

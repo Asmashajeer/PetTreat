@@ -78,13 +78,13 @@
                         <h6 class="text-muted">Order Date</h6>
                         <p class="mb-0"><%=new Date(order.createdOn).toLocaleDateString("en-GB")%></p>
                     </div>
-                    <!-- <div class="col-md-3 mb-3">
+                     <div class="col-md-3 mb-3">
                         <h6 class="text-muted">Payment Status</h6>
-                        <span class="badge bg-success fs-6">Paid</span>
-                    </div> -->
+                        <span class="badge bg-success fs-6"><%=order.paymentStatus%></span>
+                    </div>
                     <div class="col-md-3 mb-3">
                         <h6 class="text-muted">Payment Method</h6>
-                        <p class="mb-0">CashOn Delivery</p>
+                        <p class="mb-0"><%=order.paymentMethod%></p>
                     </div>
                 </div>
             </div>
@@ -140,6 +140,7 @@
                                     <th>Price</th>
                                     <th>Quantity</th>
                                     <th class="text-end">Total</th>
+                                    <th></th>
                                 </tr>                                
                         </thead>
                         <tbody>
@@ -158,6 +159,9 @@
                                 <td><%=item.price%></td>
                                 <td><%=item.quantity%></td>
                                 <td class="text-end"><%=item.subtotal%></td>
+                                <%if(item.returnStatus==='Return Approved'){%>
+                                    <td><span class="badge bg-success text-white">Returned</span></td>
+                                <%}%>
                             </tr>   
                         <%})%>    
                         </tbody>

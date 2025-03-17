@@ -10,6 +10,7 @@ const couponController = require('../../controllers/admin/couponController');
 const orderController = require('../../controllers/admin/orderController');
 const reportController = require('../../controllers/admin/reportController');
 const referralController= require('../../controllers/admin/referralController');
+const transactionController=require('../../controllers/admin/transactionController');
 
 //----multer----------
 const multer =require('multer');
@@ -27,14 +28,9 @@ router.get('/logout',adminController.logOut);
 
 
 //-----------------admin dashBoard------------------
-router.get('/dashboard/chart/:chartType',adminAuth,adminController.loadRevenueChart);
-router.get('/dashboard/monthlyChart',adminAuth,adminController.getChartData);
 
-
-
-
-
-
+router.get('/dashboard/Chart',adminAuth,adminController.getChartData);
+router.get('/dashboard/Chart/:type',adminAuth,adminController.getChartData1);
 
 //--------user Management-------------
 router.get('/users',adminAuth,customerController.customerInfo);
@@ -98,7 +94,8 @@ router.get('/salesReport',adminAuth,reportController.salesReportPage);
 router.get('/generateReport',adminAuth,reportController.generateReport);
 router.get('/exportAsPDF',adminAuth,reportController.generatePDFReport);
 
-
+//----------------transactions-------------------------
+router.get('/transactions',adminAuth,transactionController.Alltransactions);
 
 
 

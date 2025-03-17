@@ -1,16 +1,20 @@
 const Coupon = require('../../models/couponSchema');
 const Order =require('../../models/orderSchema');
 const Product= require('../../models/productSchema');
+const Category =require('../../models/categorySchema');
 const Cart = require('../../models/cartSchema');
 const User=require('../../models/userSchema');
 const Address= require('../../models/addressSchema');
 const Wallet =require('../../models/walletSchema');
+const Ledger= require('../../models/ledgerSchema');
+const moment=require('moment');
 const Razorpay = require('razorpay');
 const bodyParser= require('body-parser');
 const crypto=require('crypto');
-const {generateReceiptNumber,generateInvoiceNumber}=require('../../helpers/utils');
+const {generateReceiptNumber,generateInvoiceNumber,addTransaction}=require('../../helpers/utils');
 const env =require('dotenv').config();
 const puppeteer = require("puppeteer");
+
 
 
 const razorpay = new Razorpay({
@@ -99,6 +103,8 @@ const createOrder= async(req,res)=>{
                         Coupon:coupon
                     });
                     await newOrder.save();  
+                    let description=`order placed with ID ${newOrder.orderId}`
+                    addTransaction(newOrder.orderId,userId,'Credit',orderPrice, paymentMethod,description);
                     reduceStockOnOrder (userId,newOrder.orderId);
                     let transaction={
                         transactionType:'Debit',      
@@ -116,7 +122,7 @@ const createOrder= async(req,res)=>{
                     console.log("Wallet haven't Sufficent balance!");
                     res.json({ success: false, message: "Insufficent balance in Wallet!" });
                 }
-        }else if(paymentMethod ==='cod' && orderPrice<=1000){
+        }else if(paymentMethod ==='COD' && orderPrice<=1000){
             const newOrder = new Order({
                 userId:userId,
                 orderItems,
@@ -132,7 +138,8 @@ const createOrder= async(req,res)=>{
                 Coupon:coupon
             });
             await newOrder.save();      
-        
+            let description=`order placed with ID ${newOrder.orderId} COD Pending`;
+            addTransaction(newOrder.orderId,userId,'Debit',orderPrice, paymentMethod,description);
             reduceStockOnOrder (userId,newOrder.orderId);
             res.json({ success: true, message: "Order placed successfully!" ,redirect:`/orderSuccess?id=${newOrder.orderId}`});
         }
@@ -161,7 +168,10 @@ async function verifyPayment(req,res){
            
            console.log("Order placed successfully'");
            reduceStockOnOrder (userId,order.orderId);
+           req.session.cartSize=0;
            await Order.findOneAndUpdate({orderId:order.orderId},{$set:{paymentStatus:'Paid'}});
+           let description=`order placed and payment received with ID ${order.orderId} `;
+           addTransaction(order.orderId,userId,'Credit',order.orderPrice, 'razorpay',description);
           return res.json({ success: true, message: "Order placed successfully!" ,redirect:`/orderSuccess?id=${order.orderId}`});
 
 
@@ -200,7 +210,7 @@ async function reduceStockOnOrder (userId,orderId){
     }
                                     //----------empty the cart------------
     const emptyCart=await Cart.findOneAndDelete({userId:userId });
-    req.session.cartSize=0;
+   
     console.log("removed Cart items");
     if(!emptyCart){
         console.log("error while removing Cart items");
@@ -226,7 +236,7 @@ const orderSuccess =async (req,res)=>{
        if(orderData.modifiedCount>0){        
             order=await Order.findOne({orderId:orderId});
 
-            res.render('orderSuccess',{orderData:order});
+            res.render('orderSuccess',{orderData:order,moment});
        }else
             console.log("Add  invoice number to order failed") ;
     } catch (error) {
@@ -329,7 +339,7 @@ const detailedOrderView =async(req,res)=>{
         const orderId=req.params.id;
         console.log(orderId);
           const singleOrder=await Order.findOne({orderId:orderId}).populate('userId');// First populate User details
-          
+          const category= await Category.find({isBlocked:false});
         if(!singleOrder){
             console.log(" order not found or error");
             return res.redirect('/profile#orders');
@@ -342,7 +352,7 @@ const detailedOrderView =async(req,res)=>{
             }
         })
         
-       res.render('detailedOrderView',{order:singleOrder,address:orderAddress});
+       res.render('detailedOrderView',{category,order:singleOrder,address:orderAddress,moment});
     } catch (error) {
         console.log("error fetching order details:",error);
         res.redirect("/pageNotFound");
@@ -390,12 +400,15 @@ const cancelOrder= async(req,res)=>{
         console.log(userOrder.status);
         if(userOrder.status!=='Delivered' && userOrder.status!=='Cancelled' ){
             if(userOrder.paymentStatus!=='Paid'){
-                const changeStatus=await Order.updateOne({orderId:orderId},{$set:{status:'Cancelled'}});                
+                const changeStatus=await Order.updateOne({orderId:orderId},{$set:{status:'Cancelled'}}); 
+                let description=`Cancelled a COD order with orderId  ${orderId}`;    
+                addTransaction(orderId,userId,'Credit',userOrder.orderPrice, 'COD',description);                  
             }else{
                 let transaction={
                     transactionType:'Credit',      
                     amount:userOrder.orderPrice,
-                    description:`cancelled an Order # ${orderId} `
+                    description:`cancelled an Order `,
+                    orderId:orderId
                 };
                 //-----add  to wallet
                 const updatedWallet= await Wallet.updateOne(
@@ -406,6 +419,7 @@ const cancelOrder= async(req,res)=>{
                     },{ upsert: true });
                 console.log( updatedWallet);
                const changeStatus=await Order.updateOne({orderId:orderId},{$set:{status:'Cancelled'}});
+               addTransaction(orderId,userId,'Credit',transaction.amount, 'Refund',transaction.description);   
             }
             restockCancelOrder(userId,orderId);
                 res.redirect('/profile?tab=orders');
@@ -464,7 +478,8 @@ const cancelAnItem= async(req,res)=>{
              let transaction={
                     transactionType:'Credit',      
                     amount:totalCancelledPrice,
-                    description:`cancelled an item:  ${updateProduct.productName}  from Order #${orderId}`
+                    description:`cancelled an item:  ${updateProduct.productName}  from Order `,
+                    orderId:orderId
                 };
                 //-----add  to wallet
                 const updatedWallet= await Wallet.updateOne(
@@ -473,14 +488,14 @@ const cancelAnItem= async(req,res)=>{
                         $push:{transactions:transaction},
                         $inc:{walletAmount:totalCancelledPrice}
                     },{ upsert: true });
-                console.log( updatedWallet);
-           
+                
+                addTransaction(orderId,userId,'Credit',transaction.amount, 'Refund',transaction.description);    
         }
         console.log(updatedOrder);
         res.status(200).json({success:true,order:updatedOrder});
     }
         catch(error){
-            console.log("ServerError :",error);
+            console.log("ServerError :",error.message);
             res.status(500).json({success:false,message:"Cancel order of this item failed"});
      }
 }
@@ -518,45 +533,7 @@ const returnOrderRequest =async(req,res)=>{
       
 }
 
-//-----------------------return An Order---------------
-const returnAnOrder =async(req,res)=>{
-    const userId=req.session.user;
-    const {orderId}= req.body;
-    try {
-        const userOrder= await Order.findOne({orderId:orderId ,userId:userId});
-        if(!userOrder){
-            console.log(`order ID:${orderId} order not found`);
-            res.redirect('/pageNotFound');
-        }
-        console.log(userOrder.status);
-        if(userOrder.status==='Delivered'){ 
 
-                // let transaction={
-                //     transactionType:'Credit',      
-                //     amount:userOrder.orderPrice,
-                //     description:'Return an Order  #orderId'
-                // };
-                // //-----add  to wallet
-                // const updatedWallet= await Wallet.updateOne(
-                //     {userId:userId},
-                //     {
-                //         $push:{transactions:transaction},
-                //         $inc:{walletAmount:userOrder.orderPrice}
-                //     },{ upsert: true });
-                // console.log( updatedWallet);
-               const changeStatus=await Order.updateOne({orderId:orderId},{$set:{status:'Return Request'}});
-            
-            restockCancelOrder(userId,orderId);
-                res.redirect('/profile?tab=orders');
-            
-        }else{
-            console.log(":Cannot  return this order is  already Returned");
-            res.redirect(`/profile/?tab=orders`);
-        }
-    } catch (error) {
-        
-    }
-}
 
 //----------------------track order---------------
 
@@ -625,9 +602,7 @@ const generatePDFInvoice= async (req, res) => {
 
             await page.goto(`http://localhost:5000/order/invoice/${orderId}`, { waitUntil: "networkidle0" });
             await page.waitForSelector("#invoice-content", { visible: true });
-            // // Debug: Take a screenshot to check what Puppeteer loads
-            // await page.screenshot({ path: "debug_invoice.png", fullPage: true });
-            // console.log("Screenshot taken: debug_invoice.png");
+           
     
             const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
     
@@ -643,6 +618,9 @@ const generatePDFInvoice= async (req, res) => {
     }
     
 
+
+    
+
 module.exports={
     createOrder,
     verifyPayment,
@@ -655,7 +633,7 @@ module.exports={
     cancelAnItem,
     returnOrderRequestPage, 
      returnOrderRequest,  
-    returnAnOrder,
+    
     trackOrder,
     invoice,
     generatePDFInvoice

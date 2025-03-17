@@ -112,29 +112,6 @@
 							</ul>
 						</div>					
 
-						<!-- <div class="filter-col1 p-b-27">	
-							<div class="mtext-102 cl2 p-b-15">
-								Tags
-							</div>
-
-							<div class="flex-w p-t-4 m-r--5">
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Dry Food
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Wet Food
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Snacks
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Toys
-								</a>							
-							</div> 
-						</div> -->
 					</div>
 				</div>
 			</div>
@@ -143,13 +120,14 @@
 			<div id='productGrid' class="row isotope-grid">
 				<%products.forEach(product=>{%>
 
-					<div  class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item <%=product.category=".*"%>>">
+					<div  class="col-sm-4 col-md-3 col-lg-2 p-b-35 isotope-item mx-5 <%=product.category=".*"%>>">
 						<!-- Block2 -->
 						<div class="block2">
-							<div class="block2-pic hov-img0">
+							
+							<div class="block2-pic hov-img0 product-card">
 								<%if(product.productOffer>0){%>
-									<span class="badge rounded-pill bg-danger  ">Offer</span>
-								<%}%>	
+									<span class="offer-badge bg-danger  ">Offer</span>
+								<%}%>
 								<img src="/uploads/re-image/<%=product.productImages[0]%>" alt="IMG-PRODUCT">								
 							</div>
 
@@ -172,24 +150,20 @@
 										<%}%>	
 									</span>								
 								</div>
-
-								<div class="block2-txt-child2 flex-r p-t-3">
-									<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2" data-product-id="<%=product._id%>">
-										<img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
-										<img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">
-									</a>
-								</div>
+								<%if(locals.user){%>
+									<div class="block2-txt-child2 flex-r p-t-3">
+										<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2" data-product-id="<%=product._id%>">
+											<img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
+											<img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">
+										</a>
+									</div>
+								<%}%>	
 							</div>
 						</div>
 					</div> 
 				<%})%>
 
-				<!-- Load more
-				<div class="flex-c-m flex-w w-full p-t-45">
-					<a href="#" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04">
-						Load More
-					</a>
-				</div> -->
+				
 			</div>	
 		</div>
 	</section>
@@ -209,11 +183,11 @@
 								// Render the new products dynamically
 								data.forEach(product => {									
 										var productCard = document.createElement('div');
-										productCard.className = "col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item";
+										productCard.className = "col-sm-4 col-md-3 col-lg-2 p-b-35 isotope-item mx-5";
 										// Set the innerHTML property with template literals
 										productCard.innerHTML = `
-											<div class="block2-pic hov-img0">
-												${product.productOffer > 0 ? '<span class="badge rounded-pill bg-danger">Offer</span>' : ''}
+											<div class="block2-pic hov-img0 product-card">
+												${product.productOffer > 0 ? '<span class="offer-badge bg-danger">Offer</span>' : ''}
 												<img src="/uploads/re-image/${product.productImages[0]}" alt="${product.productName}" />
 											</div>
 											<div class="block2-txt flex-w flex-t p-t-14">

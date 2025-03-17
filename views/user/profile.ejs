@@ -48,41 +48,41 @@
           <!-- Vertical Nav (Left Side) -->
           <div class="col-md-2 mb-5">
             <ul class="nav nav-pills flex-column" id="v-pills-tab" role="tablist">
-               <li class="nav-item" role="presentation">
-                    <a class="nav-link " id="profile-tab" data-bs-toggle="pill" href="#profile" role="tab" aria-controls="profile" aria-selected="false">👤 Account</a>
+               <li class="menu-item p-2" role="presentation">
+                    <a class="menu-link " id="profile-tab" data-bs-toggle="pill" href="#profile" role="tab" aria-controls="profile" aria-selected="false">👤 Account</a>
                </li>
-              <li class="nav-item" role="presentation">
-                <a class="nav-link " id="addresses-tab" data-bs-toggle="pill" href="#addresses" role="tab" aria-controls="addresses" aria-selected="false">🏠Addresses</a>
+              <li class="menu-item p-2" role="presentation">
+                <a class="menu-link " id="addresses-tab" data-bs-toggle="pill" href="#addresses" role="tab" aria-controls="addresses" aria-selected="false">🏠Addresses</a>
               </li>              
-              <li class="nav-item" role="presentation">
-                <a class="nav-link" id="orders-tab" data-bs-toggle="pill" href="#orders" role="tab" aria-controls="orders" aria-selected="false">🔍Orders</a>
+              <li class="menu-item p-2" role="presentation">
+                <a class="menu-link" id="orders-tab" data-bs-toggle="pill" href="#orders" role="tab" aria-controls="orders" aria-selected="false">🔍Orders</a>
               </li>
-              <li class="nav-item" role="presentation">
-                <a class="nav-link" id="wishlist-tab" data-bs-toggle="pill" href="#wishlist" role="tab" aria-controls="wishlist" aria-selected="false">💛Wishlist</a>
+              <li class="menu-item p-2" role="presentation">
+                <a class="menu-link" id="wishlist-tab" data-bs-toggle="pill" href="#wishlist" role="tab" aria-controls="wishlist" aria-selected="false">💛Wishlist</a>
               </li>
-              <li class="nav-item" role="presentation">
-                <a class="nav-link" id="wallet-tab" data-bs-toggle="pill" href="#wallet" role="tab" aria-controls="wallet" aria-selected="false">💰 Wallet</a>
+              <li class="menu-item p-2" role="presentation">
+                <a class="menu-link" id="wallet-tab" data-bs-toggle="pill" href="#wallet" role="tab" aria-controls="wallet" aria-selected="false">💰 Wallet</a>
               </li>
-              <li class="nav-item" role="presentation">
-                <a class="nav-link" id="referal-tab" data-bs-toggle="pill" href="#referal" role="tab" aria-controls="referal" aria-selected="false">ReferralCode</a>
+              <li class="menu-item p-2" role="presentation">
+                <a class="menu-link" id="referal-tab" data-bs-toggle="pill" href="#referal" role="tab" aria-controls="referal" aria-selected="false">ReferralCode</a>
               </li>
             </ul>
           </div>
       
           <!-- Tab Content (Right Side) -->
-          <div class="col-md-9">
+          <div class="col-md-10">
             <div class="tab-content" id="v-pills-tabContent">
                <!-- profile Tab -->
                 <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                    <div class="card shadow  p-4" id="profileCard">
+                    <div class="card shadow col-md-6 mx-auto p-4 justify-content-center" id="profileCard">
 
                     <!--profile content-->                   
-                        <div class="row g-1 m-tb-2 ">  
-                           <div class="card-icon"><h1>👤</h1></div>
-                              <h5 class="card-title"><%=user.name%></h5>
+                        <div class="row g-1 m-tb-2 d-flex  mx-auto text-center">  
+                           <div class="card-icon "><h1>👤</h1></div>
+                              <h5 class="card-title "><%=user.name%></h5>
                               <p class="card-text"><%=user.email%></p>               
                         </div>
-                        <div class="card justify-space-betweenp-3">
+                        <div class="card justify-space-between  mp-auto p-3 ">
                           <a href="/changeEmail">change Email</a>
                             
                           <a href="/changePassword">change Password</a>
@@ -137,26 +137,7 @@
                     <div class="container py-4">
                         <h3 class="mb-4">My Orders</h3>
                 
-                      <form method="GET" action="/orders">  <!-- Filters -->
-                        <!-- <div class="row mb-4">
-                            <div class="col-md-3">
-                                <select class="form-select">
-                                    <option>All Orders</option>
-                                    <option>Last 30 days</option>
-                                    <option>Last 6 months</option>
-                                    <option>2024</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <select class="form-select">
-                                    <option>All Status</option>
-                                    <option>Delivered</option>
-                                    <option>Processing</option>
-                                    <option>Shipped</option>
-                                    <option>Cancelled</option>
-                                </select>
-                            </div>
-                        </div> -->
+                      <form method="GET" action="/orders">                       
                       
                         <!-- Orders Table -->
                         <div class="card ">
@@ -166,7 +147,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Order ID</th>
-                                                <th style="width: 300px;">Date</th>
+                                                <th style="width: 100px;">Date</th>
                                                 <th>Status</th>
                                                 <th>Payment Status</th>
                                                 <th>Payment Method</th>
@@ -190,7 +171,7 @@
                                                   <td>
                                                        <a href="/orders/trackorder/<%=order.orderId%>" class="btn btn-outline-secondary btn-sm">Track</a>
                                                       <a href="/orders/detailedOrderView/<%=order.orderId%>" class="btn btn-outline-secondary btn-sm">Details</a>
-                                                     <% if(order.status!=='Cancelled' && order.status!=='Delivered'){%>
+                                                     <% if(order.status!=='Cancelled' && order.status!=='Delivered' && order.status!=='Returned'){%>
                                                         <a href="/orders/cancelOrder/<%=order.orderId%>" onclick="return confirmation('Are you sure ,you want to Cancel Order?')" class="btn btn-outline-danger btn-sm">Cancel</a>
                                                       <%}%>
                                                   </td>
@@ -202,30 +183,22 @@
                                 </div> 
                                  <!-- Pagination -->
                                  <nav>                 
-                                  <ul class="pagination justify-content-center">
-                                          <%if (orderData.currentPage>1){%>
-                                              <li class="page-item">
+                                  <ul class="pagination d-flex justify-content-center pb-2">
+                                          <%if (orderData.currentPage>1){%>                                            
                                                   <a class="page-link" href="?page=<%= orderData.currentPage-1 %>"  aria-label="Previous">
                                                       <span aria-hidden="true">&laquo;</span>
-                                                  </a>
-                                              </li>                    
+                                                  </a>                                                               
                                           <%}%>
-                                          <%for(let i=1;i<=orderData.totalPages;i++){%> 
-                                          
-                                              <%if(i==orderData.currentPage){%>
-                                                  <li class="page-item">   
-                                                    <span  class="page-link " href=""><%= i %></span></a> 
-                                              <%}else{%>
-                                                  <li class="page-item" >
-                                                      <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-                                                  </li>
+                                          <%for(let i=1;i<=orderData.totalPages;i++){%>                                          
+                                              <%if(i==orderData.currentPage){%>                                                    
+                                                    <span  class="current-page bg-custom " href=""><%= i %></span></a> 
+                                              <%}else{%>                                                  
+                                                      <a  href="?page=<%= i %>"><%= i %></a>                                                  
                                           <%}}%>
-                                          <%if (orderData.currentPage<orderData.totalPages){%>
-                                              <li class="page-item">
-                                                  <a class="page-link" href="?page=<%= orderData.currentPage+1 %>" aria-label="Next">
+                                          <%if (orderData.currentPage<orderData.totalPages){%>                                              
+                                                  <a  href="?page=<%= orderData.currentPage+1 %>" aria-label="Next">
                                                       <span aria-hidden="true">&raquo;</span>
-                                                  </a>
-                                              </li>
+                                                  </a>                                              
                                           <% }%>       
                                   </ul>
                               </nav>                              
@@ -257,6 +230,7 @@
                                       <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-start">
                                             <div>
+                                                <input type="hidden" value="<%=product.productId._id%>" name="productId" id="productId">
                                                 <h6 class="card-title mb-1"><%=product.productId.productName%></h6>
                                                 <p class="card-text mb-1">
                                                     <small class="text-muted">Brand: <%=product.productId.brand%></small>
@@ -267,7 +241,7 @@
                                                 <%if(product.productId.stock>0){%>
                                                   <p class="card-text mb-2">
                                                       <span class="badge bg-success">In Stock</span>
-                                                      <small class="text-muted ms-2"><%=product.productId.quantity%> items available</small>
+                                                      <small class="text-muted ms-2"><%=product.productId.stock%> items available</small>
                                                   </p>
                                                 <%}else{%>
                                                   <p class="card-text mb-2">
@@ -282,12 +256,16 @@
                                                 </a>
                                             </div>
                                         </div>
-                                        <div class="d-flex gap-2">
-                                            <button class="btn btn-primary">
-                                                <i class="zmdi zmdi-shopping-cart me-2"></i>
-                                                Add to Cart
-                                            </button>
-                                        </div>
+                                        <%if(product.productId.stock>0){%>
+                                          <div class="d-flex gap-2">
+                                              <button class="btn btn-primary" onclick="addToCart('<%=product.productId._id%>')">
+                                                  <i class="zmdi zmdi-shopping-cart me-2"></i>
+                                                  Add to Cart
+                                              </button>
+                                              <div  id="error-message" class="alert alert-danger text-center d-none">							
+                                              </div>
+                                          </div>
+                                        <%}%>
                                       </div>
                                 </div>
                               </div>
@@ -310,18 +288,27 @@
               <!-- Wallet Tab -->
             <div class="tab-pane fade" id="wallet" role="tabpanel" aria-labelledby="wallet-tab">
               <div class="row m-2">
-                <div class="card p-4 col-md-3 shadow m-2">
-                  <h3 class="card-title bg-light ">Wallet</h3>                 
+                <div class="card p-4 col-md-6 shadow m-2">
+                  <h3 class="card-title bg-light ">Wallet</h3> <button id="topup"  type="button" class="btn fw-bold text-end " style="color:#dead65">TopUp</button>                
                   <div class="card-body align-items-center">
                     <%if(wallet){%>
-                       <h6 id="walletbalance">Balance : ₹<%=wallet.walletAmount.toFixed(2)%></h6>
+                       <h6 id="walletbalance">Balance : ₹ <%=wallet.walletAmount.toFixed(2)%></h6>
                     <%}else{%>
                       <h6 id="walletbalance">Balance : ₹ 0.00 %></h6>
                     <%}%>
-                  </div>  
-                  <!-- <button href="#" class="btn btn-sm text-end ">Top Up</buttom>                                      -->
+                    <div class="input-group input-group-sm my-2 p-3 d-none d-flex" id="addAmount" >
+                        <form  class=" form-inline d-flex">                          
+                            <input type="number" id="amount" name="amount"   class="form-control w-50" placeholder="amount " required>
+                            <button type ="button" class=" btn btn-sm text-success form-control " id="btAddMoney"><i class="fas fa-plus-circle ">Add money</i></button>
+                          <div class="alert alert-danger text-center d-none" id="addAmounterror"> </div>
+                        </form>  
+                    </div>
+                  </div>                    
+                  <!-- <button id="topup"  type="button" class="btn fw-bold text-end " style="color:#dead65">TopUp</button>                                      -->
                 </div>
-                                      
+                
+              </div> 
+              <div class="row m-2">                       
                 <div class="card-body col-md-6 m-2 border">
                     <div class="table-responsive">
                         <table class="table bg-transperant" id="walletTable">
@@ -343,7 +330,7 @@
                                     <td><%=transaction.transactionType%></td>
                                     <td><%=transaction.description%></td>
                                     <%if(transaction.orderId){%>
-                                        <td><%=transaction.orderId%></td> 
+                                        -<td><a  class="text-primary" href="/orders/detailedOrderView/<%=transaction.orderId%>"><%=transaction.orderId%></a></td> 
                                     <%}%>                                   
                                 </tr>    
                                 <%})%>
@@ -351,14 +338,8 @@
                             </tbody>
                         </table>
                     </div>                    
-                </div> 
-              
-                <div class="input-group input-group-sm  w-25 " id="addAmount">
-                  <form  class="border ml-2 p-1">
-                    <input type="number" id="amount" name="amount"   class="form-control " placeholder="amount " required>
-                    <button type ="button" class="btn btn-sm text-success " id="btAddMoney"><i class="fas fa-plus-circle ">Add money</i></button>
-                    <div class="alert alert-danger text-center d-none" id="addAmounterror"> </div>
-                </div>    
+                </div>           
+                    
               </div> 
             </div>
               <!-- referalCodeTab -->
@@ -381,6 +362,9 @@
         </div>
     </div>
       <script>
+        const topup=document.getElementById('topup');
+        const  addAmount=document.getElementById('addAmount');
+
         document.addEventListener('DOMContentLoaded', function() {
             const selectedTab = "<%= selectedTab %>";
             if (selectedTab) {
@@ -398,6 +382,12 @@
             }
             
         });
+        topup.addEventListener('click',function(){
+            addAmount.classList.remove('d-none');
+            addAmount.classList.add('d-block');
+        })
+
+
 
         //----------------------generate Rferal Code------------------------
       function getReferalCode(name){              
@@ -411,7 +401,40 @@
                }).catch(error=>console.log("error generating referal code",error));
             }
 
-              //------------------------add money to Wallet-----------------
+
+
+    //-------------------add to Cart from wishlist----------
+    async function addToCart(productId){
+      const errorMessage=document.getElementById('error-message')	;
+      try{
+            let quantity=1;
+					const response=await fetch('/addToCart',{
+						method:'POST',
+						headers:{
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({quantity,productId})
+					});	
+					if (!response.ok) {
+            				throw new Error(`HTTP Error! Status: ${response.status}`);
+        			}		
+					const data= await response.json();						
+					if(data.cart){
+						console.log('success', data.cart);
+						window.location.href="/shopingCart";
+					}else{
+						console.log(data.message);
+						errorMessage.classList.remove('d-none');
+						errorMessage.classList.add('block');
+						errorMessage.innerText=data.message;
+					}
+					
+				}catch(error){
+					console.error('Error adding to Cart:', error);
+				}
+		
+    }
+   //------------------------add money to Wallet-----------------
    const btAddMoney=document.getElementById('btAddMoney');
    btAddMoney.addEventListener('click',async function(){
          console.log(  "clicked");

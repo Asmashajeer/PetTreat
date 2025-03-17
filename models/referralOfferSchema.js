@@ -9,10 +9,7 @@ const referralOfferSchema = new Schema({
         type:Number,       
         required:true,        
     },
-    minimumAmount:{
-        type:Number,       
-        required:true,        
-    },
+    
     isActive:{
         type:Boolean,
         default:true

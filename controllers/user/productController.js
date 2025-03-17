@@ -129,25 +129,28 @@ const categorisedProducts= async(req,res)=>{
        
         if(user){
                 const userData= await User.findOne({_id:user})
-        }        
-        const categoryId= req.query.id;
-       
-   
+        }
         const categories= await Category.find({isListed:true});
-        const currentCategory=await Category.findById(categoryId);
-        const query={
-            isBlocked:false,
-            stock:{$gt:0},      
-            category:categoryId
-                }  
-        const productData=await Product.find(query);
-       
-        //  //-----for ajax call-------------------   
-        //         if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-        //             // If AJAX request, send products as JSON          
-        //             return res.json(productData);
-        //         }
-            
+        let query={};
+        let currentCategory=req.query.id;
+        if(req.query.id){        
+            const categoryId= req.query.id;  
+            currentCategory=await Category.findById(categoryId);
+            query={
+                isBlocked:false,
+                stock:{$gt:0},      
+                category:categoryId
+                }                
+        }else if(req.query.name){
+            const categoryName= req.query.name;   
+            currentCategory=await Category.findOne({name:categoryName});
+            query={
+                isBlocked:false,
+                stock:{$gt:0},      
+                category:currentCategory._id
+                }               
+        }
+        const productData=await Product.find(query);          
         if(user){
             const userData= await User.findOne({_id:user})
             return  res.render('categorised',{user:userData,products:productData, category:categories,currentCategory:currentCategory,cartSize:req.session.cartSize,wList:req.session.wList});            

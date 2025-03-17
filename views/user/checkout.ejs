@@ -61,7 +61,7 @@
                         <div class="form-group mt-3">
                           
                             <div class="d-flex align-items-center mb-2 pl-5">
-                                <input type="radio" name="paymentMethod" value="cod" id="cod" class="me-2" checked> Cash on Delivery (COD)
+                                <input type="radio" name="paymentMethod" value="COD" id="COD" class="me-2" checked> Cash on Delivery (COD)
                             </div>
                             <div class="d-flex align-items-center mb-2 pl-5">
                                 <input type="radio" name="paymentMethod" value="razorpay"  id="razorpay" class="me-2"> Razorpay
@@ -178,17 +178,17 @@
         const discountField = document.getElementById('discount');
         const totalElement = document.getElementById('orderTotal');  
         const orderTotal = parseFloat(totalElement.innerText); 
-        const cod=document.getElementById('cod');
+        const COD=document.getElementById('COD');
         const razorpay=document.getElementById('razorpay');
 
         document.addEventListener("DOMContentLoaded", () => {
             const totalElement = document.getElementById('orderTotal');  
         const orderTotal = parseFloat(totalElement.innerText); 
-        const cod=document.getElementById('cod');
+        const COD=document.getElementById('COD');
         const razorpay=document.getElementById('razorpay');
             if (orderTotal> 1000) {
-                cod.disabled = true; // Disable COD option
-                cod.parentElement.style.opacity = "0.5"; // Make it look disabled
+                COD.disabled = true; // Disable COD option
+                COD.parentElement.style.opacity = "0.5"; // Make it look disabled
                 razorpay.checked=true;
             }
         });

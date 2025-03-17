@@ -43,7 +43,7 @@
 <body>
   <div class="container col-md-10 mt-5">
     <h1 class="text-center mb-4">Edit Product</h1>
-    <!-- <form action="/admin/updateProduct/<%= product._id %>" method="PUT" enctype="multipart/form-data" > -->
+    
     <form id="updateForm" enctype="multipart/form-data"> 
       <div class="row">
         <div class="col-md-6 mb-3">
@@ -124,9 +124,9 @@
             <div class="mb-4">
                 <div class="col-12 ">
                     <td id="img-container">                     
-                        <input type="hidden" value="<%=product.productImages[i]%>" name="productImages" id="imageDatas">
+                        <input type="hidden" class="form-control" value="<%=product.productImages[i]%>" name="productImages" id="imageDatas">
                         <img class="rounded" style="width: 50px; height: 60px;"   src="/uploads/re-image/<%=product.productImages[i]%>"                            alt="">
-                         <button class="close-icon"  onclick="deleteImg(this,'<%= product._id%>','<%=product.productImages[i]%>')" >&times;</button>                   
+                        <!-- <button class="close-icon"  onclick="deleteImg(this,'<%= product._id%>','<%=product.productImages[i]%>')" >&times;</button>                    -->
                  
                   </td>
                 </div>
@@ -134,12 +134,7 @@
             </div>
           </div>
       <%}%>
-      <!-- <div> -->
-        <!-- Toggle link -->
-        <!-- <a href="" id="toggleUpload" onclick="toggleUploadDiv(event)">Upload New Images</a>
-      </div>     -->
-      <!----change image and cropping-->
-      <!-- <div  id="uploadDiv" class="row " style="display:none">--->
+      
         <div class="col-md-4 mb-3">
           <label for="imageInput1" class="form-label">Product Image 1:</label>
           <input type="file" class="form-control" id="imageInput1" name="productImages" accept="image/png, image/jpeg, image/jpg">
@@ -149,25 +144,7 @@
           </div>
           <div class="error-message" id="imageInput1-error"></div>
         </div>
-        <!-- <div class="col-md-4 mb-3">
-          <label for="imageInput2" class="form-label">Product Image 2:</label>
-          <input type="file" class="form-control" id="imageInput2" name="productImages" accept="image/png, image/jpeg, image/jpg">
-          <div id="cropperContainer2" style="display: none;" class="mt-3">
-            <img id="imageToCrop2" class="img-fluid" />
-            <button type="button" id="cropButton2" class="btn btn-primary mt-2">Crop</button>
-          </div>
-         <div class="error-message" id="imageInput2-error"></div> 
-        </div>
-        <div class="col-md-4 mb-3">
-          <label for="imageInput3" class="form-label">Product Image 3:</label>
-          <input type="file" class="form-control" id="imageInput3" name="productImages" accept="image/png, image/jpeg, image/jpg">
-          <div id="cropperContainer3" style="display: none;" class="mt-3">
-            <img id="imageToCrop3" class="img-fluid" />
-            <button type="button" id="cropButton3" class="btn btn-primary mt-2">Crop</button>
-          </div>
-          <div class="error-message" id="imageInput3-error"></div> 
-        </div> -->
-      <!--</div> -->
+       
 
       <div id="preview" class="row mt-3"></div>
       <button type="submit"  class="btn btn-success mt-4">Save Changes</button>
@@ -185,8 +162,7 @@
 
         const imageInputs = [
         { input: 'imageInput1', cropperContainer: 'cropperContainer1', imageToCrop: 'imageToCrop1', cropButton: 'cropButton1' },
-        // { input: 'imageInput2', cropperContainer: 'cropperContainer2', imageToCrop: 'imageToCrop2', cropButton: 'cropButton2' },
-        // { input: 'imageInput3', cropperContainer: 'cropperContainer3', imageToCrop: 'imageToCrop3', cropButton: 'cropButton3' },
+       
         ];
 
         imageInputs.forEach((imageInputObj, index) => {
@@ -357,7 +333,7 @@
                  
                   window.location.href='/admin/products/' 
               } else {
-                  alert(`Error: ${result.message || 'Failed to update the product.'}`);
+                  alert(`Error: ${result.error} || 'Failed to update the product.'}`);
               }
             } catch (error) {
                 console.error('Error updating the product:', error);

@@ -45,13 +45,12 @@
     </style>
 </head>
 <body>
-    <div class="container py-5">
+    <div  class="container-fluid mt-2 bg-custom">
         <div class="form-container align-items-center">            
-            <div class="row">
+            <div class="row mt-5">
                 <%if(refOffer.length>0){%> 
-                <!-- Display Card on Left Side -->
-                <div class="col-md-4 mb-4 mb-md-0">
-                    <div class="card display-card">
+                <!-- Display Card on Left Side -->                
+                    <div class="card display-card col-md-4 mb-4 mb-md-0">
                        
                             <%refOffer.forEach(offer=>{%>
                             <div class="card-header d-flex justify-content-between align-items-center">
@@ -68,10 +67,10 @@
                                     <div class="amount-label">Referee Reward</div>
                                     <div class="amount-display" id="displayRefereeAmount">₹<%=offer.refereeAmount%></div>
                                 </div>
-                                <div class="mb-4 text-center">
+                                <!-- <div class="mb-4 text-center">
                                     <div class="amount-label">Minimum purchase Amount for Reward</div>
                                     <div class="amount-display" id="displayRefereeAmount">₹<%=offer.minimumAmount%></div>
-                                </div>
+                                </div> -->
                                 <div class="text-center mt-4 d-none">
                                     <div class="alert alert-info" role="alert">
                                         <small></small>
@@ -83,11 +82,11 @@
                             </a>
                             <%})%>            
                     </div>
-                </div>
+               
                 <%}else{%>   
                 <!-- Form Card on Right Side -->
            
-                <div class="col-md-6">
+                <div class=" col-md-6 ">
                     <div><h6 class="text-center" >No  referral Offer</h6>   </div>
                     <div class="card">
                         <div class="card-header p-3">
@@ -109,12 +108,12 @@
                                         <input type="number" class="form-control" name="refereeAmount" id="refereeAmount" min="10" step="0.01" placeholder="Referee Amount" required>
                                     </div>
                                 </div>
-                                <div class="mb-3">                                 
+                                <!-- <div class="mb-3">                                 
                                     <div class="input-group">
                                         <span class="input-group-text">₹</span>
                                         <input type="number" class="form-control" name="minimumAmount" id="minimumAmount" min="500" step="0.01" placeholder="Minimum purchase Amount" required>
                                     </div>
-                                </div>
+                                </div> -->
                                 <div class="mb-3">
                                     <!-- <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="isActive" checked>

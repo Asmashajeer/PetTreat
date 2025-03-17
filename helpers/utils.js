@@ -3,7 +3,7 @@ const nodemailer =require('nodemailer');
 const bcrypt= require('bcrypt');
 const env =require('dotenv').config();
 const crypto=require('crypto');
-
+const Ledger= require('../models/ledgerSchema');
 
 
 //-------------secure Password----------
@@ -60,16 +60,32 @@ function generateReceiptNumber(prefix = "REC", length = 10) {
     return `${prefix}-${receiptNumber}`;
 }
 
+
+//-----------generate Invoice Number------------
 function generateInvoiceNumber(orderId) {
     const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
     return `INV-${orderId}-${timestamp}`;
 }
 
 
+//--------------add Ledger entry----------------
+const addTransaction=async function (orderId,userId,transactionType,amount, paymentMethod,description){
+    const newEntry=new Ledger({
+        transactionId: `TXN${Date.now()}`, // Unique Transaction ID
+        orderId,
+        userId,
+        transactionType,
+        amount,
+        paymentMethod: paymentMethod,
+        description
+    });
+    await newEntry.save();
+}
 module.exports={
     generateOtp,
     sendVerificationEmail,
     securePassword,
     generateReceiptNumber,
-    generateInvoiceNumber
+    generateInvoiceNumber,
+    addTransaction
 }

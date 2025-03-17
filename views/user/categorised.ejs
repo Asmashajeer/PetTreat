@@ -117,10 +117,13 @@
 
 			<div id='productGrid' class="row isotope-grid">
 				<% products.forEach(product=>{%>
-					<div  class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item <%=product.category=".*"%>>">
-						<!-- Block2 -->
+					<div  class="col-sm-4 col-md-3 col-lg-2 p-b-35 isotope-item mx-5 <%=product.category=".*"%>>">
+						<!-- Block2 --> 
 						<div class="block2">
-							<div class="block2-pic hov-img0">
+							<div class="block2-pic hov-img0  product-card">
+								<%if(product.productOffer>0){%>
+									<span class="offer-badge bg-danger   ">Offer</span>
+								<%}%>	
 								<img src="/uploads/re-image/<%=product.productImages[0]%>" alt="IMG-PRODUCT">								
 							</div>
 
@@ -129,17 +132,22 @@
 									<a href="/productDetails?id=<%=product._id%>" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
 										<%=product.productName%>
 									</a>
-									<span class="stext-105 cl3">
-										<%=product.regularPrice.toFixed(2)%>
-									</span>								
+									<%if(product.productOffer>0){%>
+										<s><%=product.regularPrice.toFixed(2)%></s>
+										<span class="text-danger"><%=product.salePrice.toFixed(2)%></span>											
+										<span class="badge rounded-pill bg-danger  ">Offer</span>
+									<%}else{%>
+										<%=product.salePrice.toFixed(2)%>
+									<%}%>							
 								</div>
-
-								<div class="block2-txt-child2 flex-r p-t-3">
-									<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2" data-product-id="<%=product._id%>">
-										<img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
-										<img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">
-									</a>
-								</div>
+								<%if(locals.user){%>
+									<div class="block2-txt-child2 flex-r p-t-3">
+										<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2" data-product-id="<%=product._id%>">
+											<img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
+											<img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">
+										</a>
+									</div>
+								<%}%>	
 							</div>
 						</div>
 					</div> 

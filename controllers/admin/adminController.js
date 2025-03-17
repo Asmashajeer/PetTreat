@@ -109,7 +109,7 @@ const loadDashboard=async (req,res)=>{
                 productsInStock,
                 productsOutofStock
             } ;
-            // console.log(Total);
+           
              //----------Top Selling products---------------
              const topSellingProducts= await Order.aggregate([
                 {$unwind:'$orderItems'},
@@ -129,17 +129,10 @@ const loadDashboard=async (req,res)=>{
 
              ] );              
             
-            // if(topSellingProducts.length>0){
-            //     topSellingProducts.forEach(product => {
-            //         console.log(`Product Name: ${product.productName}, Sold: ${product.totalQuantitySold}`);
-            //     });
-            // }else{
-            //     console.log("cannot fetch top selling products");
-            // }
-            
+           
              
             //------------recent orders--------
-            const orders= await Order.find().populate('userId').sort({createdOn:1}).limit(10);
+            const orders= await Order.find().populate('userId').sort({createdOn:-1}).limit(10);
            
             res.render('dashBoard',{Total,orders,moment,topSellingProducts});
         }
@@ -170,83 +163,8 @@ const logOut=async(req,res)=>{
 
 
 
-const loadRevenueChart= async(req,res)=>{
-    try {
-        const chartType=req.params.chartType;
-        console.log(chartType);
-        let startDate, endDate, groupFormat;
-        if (chartType=== 'daily') {
-            startDate = moment().startOf('day').toDate();
-            endDate = moment().endOf('day').toDate();
-            groupFormat = '%H:00'; // Group by hour
-           
-        } else if(chartType==='weekly'){
-            startDate = moment().startOf('week').toDate();
-            endDate = moment().endOf('week').toDate();
-            groupFormat = '%Y-%m-%d'; // Group by day
-        } else if (chartType === 'monthly') {
-            startDate = moment().startOf('month').toDate();
-            endDate = moment().endOf('month').toDate();
-            groupFormat = '%Y-%m-%d'; // Group by day
-        } else if(chartType ==='yearly') {
-            startDate = moment().startOf('year').toDate(); // Jan 1st, 00:00:00
-            endDate = moment().endOf('year').toDate(); 
-             groupFormat = '%Y-%m'; 
-        } else {
-            return res.status(400).json({ message: "Invalid type" });
-        }
-        console.log(startDate ,endDate,groupFormat);
-        // Aggregation query
-        const revenueData = await Order.aggregate([
-            {
-                $match: {
-                    createdOn: { $gte: startDate, $lte: endDate },
-                    paymentStatus: 'Paid'
-                }
-            },
-            {
-                $group: {
-                    _id: { $dateToString: { format: groupFormat, date: "$createdOn" } },
-                    totalRevenue: { $sum: "$orderPrice" }
-                }
-            },
-            { $sort: { _id: 1 } } // Sort by date
-        ]);
-        console.log(revenueData);
-        res.json(revenueData);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server Error" });
-     }
-}
 
-//------------top selling product chart----------
-const getTopSellingProducts = async (req, res) => {
-    try {
-        const topProducts = await Order.aggregate([
-            {$unwind:'$orderItems'},
-            {$group:{
-                _id:'$orderItems.product',
-                totalQuantitySold:{$sum:'$orderItems.quantity'}
-            }},
-            {$sort:{totalQuantitySold:-1}},
-            {$limit:10} ,
-            { $lookup: { from: "products", localField: "_id", foreignField: "_id", as: "productInfo" }},
-            { $unwind: "$productInfo" },
-                      
-            {$project: {
-                productName: "$productInfo.productName",
-                totalQuantitySold: 1
-                }
-            }
-        ]);
-        // console.log(topProducts);
-        return res.json((topProducts));
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Server Error" });
-    }
-};    
+
 
 
 
@@ -269,7 +187,7 @@ const getChartData= async (req,res)=>{
                 }
             }
          ] );   
-         console.log("products:--------- ",topSellingProducts);
+      
 
          //---------------Best selling categories--------------
          const topSellingCategories= await Order.aggregate([
@@ -294,7 +212,7 @@ const getChartData= async (req,res)=>{
             }
             
          ] );   
-         console.log("category: ",topSellingCategories);
+        
 
            //---------------Best selling brands--------------
            const topSellingBrands= await Order.aggregate([
@@ -318,19 +236,139 @@ const getChartData= async (req,res)=>{
             }
             
          ] );   
-         console.log("brands: ",topSellingBrands);
+         
+      
          res.json({products:topSellingProducts,categories:topSellingCategories,brands:topSellingBrands});
     } catch (error) {
         
     }
 }
+
+
+
+//--------------------------------yearly chat data-------------------
+const getChartData1= async (req, res) => {
+    try {
+        const type = req.params.type; // type = 'yearly' or 'monthly'
+        console.log(type);
+            let groupBy;
+         if(type === "yearly") 
+             groupBy ={ year: { $year: "$createdOn" } } ; 
+         else if (type === "monthly")
+             groupBy = { year: { $year: "$createdOn" }, month: { $month: "$createdOn" } };
+         else
+            groupBy={};
+        //------------TOP SELLING PRODUCTS--------------
+        const topSellingProducts = await Order.aggregate([
+            { $unwind: "$orderItems" },
+            { 
+                $group: {
+                    _id: { ...groupBy, product: "$orderItems.product" },
+                    totalQtySold: { $sum: "$orderItems.quantity" }
+                }
+            },
+            { $sort: { totalQtySold: -1 } },
+            { $limit: 10 },
+            { 
+                $lookup: {
+                    from: "products",
+                    localField: "_id.product",
+                    foreignField: "_id",
+                    as: "productInfo"
+                } 
+            },
+            { $unwind: "$productInfo" },
+            { 
+                $project: {
+                    year: "$_id.year",
+                    month: type === "monthly" ? "$_id.month" : null,
+                    name: "$productInfo.productName",
+                    totalQtySold: 1
+                }
+            }
+        ]);
+        console.log(topSellingProducts);
+        //--------------TOP SELLING  CATEGORIES------
+        const topSellingCategories = await Order.aggregate([
+            { $unwind: "$orderItems" },
+            { 
+                $lookup: {
+                    from: "products",
+                    localField: "orderItems.product",
+                    foreignField: "_id",
+                    as: "productInfo"
+                }
+            },
+            { $unwind: "$productInfo" },
+            { 
+                $group: {
+                    _id: { ...groupBy, category: "$productInfo.category" },
+                    totalQtySold: { $sum: "$orderItems.quantity" }
+                }
+            },
+            { $sort: { totalQtySold: -1 } },
+            { $limit: 10 },
+            { 
+                $lookup: {
+                    from: "categories",
+                    localField: "_id.category",
+                    foreignField: "_id",
+                    as: "categoryInfo"
+                }
+            },
+            { $unwind: "$categoryInfo" },
+            { 
+                $project: {
+                    year: "$_id.year",
+                    month: type === "monthly" ? "$_id.month" : null,
+                    name: "$categoryInfo.name",
+                    totalQtySold: 1
+                }
+            }
+        ]);
+        
+        //--------------TOP SELLING BRANDS----------
+        const topSellingBrands = await Order.aggregate([
+            { $unwind: "$orderItems" },
+            { 
+                $lookup: {
+                    from: "products",
+                    localField: "orderItems.product",
+                    foreignField: "_id",
+                    as: "productInfo"
+                }
+            },
+            { $unwind: "$productInfo" },
+            { 
+                $group: {
+                    _id: { ...groupBy, brand: "$productInfo.brand" },
+                    totalQtySold: { $sum: "$orderItems.quantity" }
+                }
+            },
+            { $sort: { totalQtySold: -1 } },
+            { $limit: 10 },
+            { 
+                $project: {
+                    year: "$_id.year",
+                    month: type === "monthly" ? "$_id.month" : null,
+                    name: "$_id.brand",
+                    totalQtySold: 1
+                }
+            }
+        ]);
+        res.json({products:topSellingProducts,categories:topSellingCategories,brands:topSellingBrands});
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Server error" });
+    }
+};
 module.exports={
     loadLogin,
     login,
     loadDashboard,
     pageError,
     logOut,
-    loadRevenueChart,
-    getTopSellingProducts,
-    getChartData
+   getChartData,
+    getChartData1
+    
 }

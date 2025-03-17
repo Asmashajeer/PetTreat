@@ -142,8 +142,9 @@
                 <div class="d-flex align-items-center">
                 <label for="timeFilter" class="me-2">Time Period:</label>
                 <select id="timeFilter" class="form-select form-select-sm" style="width: 150px;">
+                    <option value=" " selected></option>
                     <option value="monthly">Monthly</option>
-                    <option value="yearly" selected>Yearly</option>
+                    <option value="yearly" >Yearly</option>
                 </select>
                 </div>
             </div>
@@ -155,7 +156,7 @@
         <div class="col-md-4 mb-4">
           <div class="card h-100">
             <div class="card-header ">
-              <h6 class="card-title text-center mb-0">Best Selling Products</h6>
+              <h6 class="card-title text-center text-white mb-0">Best Selling Products</h6>
             </div>
             <div class="card-body">
               <div class="chart-container">
@@ -170,7 +171,7 @@
         <div class="col-md-4 mb-4">
           <div class="card h-100">
             <div class="card-header ">
-              <h6 class="card-title text-center mb-0">Best Selling Categories</h6>
+              <h6 class="card-title text-center  text-white mb-0">Best Selling Categories</h6>
             </div>
             <div class="card-body">
               <div class="chart-container">
@@ -185,7 +186,7 @@
         <div class="col-md-4 mb-4">
           <div class="card h-100">
             <div class="card-header ">
-              <h6 class="card-title text-center mb-0">Best Selling Brands</h6>
+              <h6 class="card-title text-center   text-white mb-0">Best Selling Brands</h6>
             </div>
             <div class="card-body">
               <div class="chart-container">
@@ -207,7 +208,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Recent Orders</h5>
-                    <button class="btn btn-sm btn-outline-primary">View All</button>
+                    <a href="/admin/orders" class="btn btn-sm btn-outline-light">View All</a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -256,84 +257,8 @@
         
     </div>
     <div class="row mt-3">
-        <!-- Top-Selling Products -->
-       <div class="col-md-4">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">Top-Selling Products</h6>
-                    <button class="btn btn-sm btn-outline-primary">View All</button>
-                </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush">
-                    <%if(topSellingProducts.length>0){%>
-                        <%topSellingProducts.forEach(product=>{%>
-                            <div class="list-group-item p-1 d-flex align-items-center">                            
-                                <div class="flex-grow-1">
-                                    <p class="mb-0"><strong><%=product.productName%></strong></p>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <small class="text-muted"><%=product.totalQuantitySold%></small>
-                                       
-                                    </div>
-                                    
-                                </div>
-                            </div>
-                        <%})%>
-                    <%}%>        
-                            
-                    </div>
-                </div>
-            </div>
-        </div>    
-        <!-- Wallet Balance Overview -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Wallet Balance Overview</h5>
-                </div>
-                <div class="card-body">
-                    <h3 class="text-center mb-4">$78,450.85</h3>
-                    <h6 class="text-muted">Total User Wallet Balance</h6>
-                    
-                    <div class="mt-4">
-                        <h6>Recent Transactions</h6>
-                        <div class="list-group list-group-flush">
-                            <div class="list-group-item p-2 d-flex justify-content-between align-items-center">
-                                <div>
-                                    <small class="d-block">Customer #1245</small>
-                                    <small class="text-muted">Wallet Deposit</small>
-                                </div>
-                                <span class="badge bg-success">+$250.00</span>
-                            </div>
-                            <div class="list-group-item p-2 d-flex justify-content-between align-items-center">
-                                <div>
-                                    <small class="d-block">Customer #8754</small>
-                                    <small class="text-muted">Wallet Withdrawal</small>
-                                </div>
-                                <span class="badge bg-danger">-$120.50</span>
-                            </div>
-                            <div class="list-group-item p-2 d-flex justify-content-between align-items-center">
-                                <div>
-                                    <small class="d-block">Customer #9876</small>
-                                    <small class="text-muted">Purchase Payment</small>
-                                </div>
-                                <span class="badge bg-danger">-$350.00</span>
-                            </div>
-                            <div class="list-group-item p-2 d-flex justify-content-between align-items-center">
-                                <div>
-                                    <small class="d-block">Customer #5432</small>
-                                    <small class="text-muted">Refund</small>
-                                </div>
-                                <span class="badge bg-success">+$75.20</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="d-grid mt-3">
-                        <button class="btn btn-sm btn-outline-primary">View All Transactions</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+         
+        
     </div>    
 </div>
 </div>
@@ -346,10 +271,19 @@
 
 <!-- Chart initialization -->
 <script>
+    const timeFilter=document.getElementById('timeFilter');
+        timeFilter.addEventListener('change',async function(){
+            let type= timeFilter.value;            
+                const response= await fetch(`/admin/dashboard/Chart/${type}`);
+                const data=await response.json();
+                console.log(data);
+                initCharts(data) ;
+            
+        })
     document.addEventListener('DOMContentLoaded', async function() {     
     
     try{
-        const response= await fetch('/admin/dashboard/monthlyChart');
+        const response= await fetch('/admin/dashboard/Chart');
         const data=await response.json();
         console.log(data);
         initCharts(data)
@@ -371,6 +305,10 @@
 
     // Initialize charts
     function initCharts(data) {
+        if (productChart) productChart.destroy();
+        if (categoryChart) categoryChart.destroy();
+        if (brandChart) brandChart.destroy();
+
       //--- Product chart
       const productCtx = document.getElementById('productChart').getContext('2d');
       productChart = createPieChart(productCtx, data.products, 'productLegend');
@@ -386,7 +324,17 @@
 
     // Create pie chart
     function createPieChart(ctx, data, legendId) {
-      const names = data.map(item => item.name);
+        const names = data.map(item => {
+            if (item.month) {
+                return `${item.year} (${getMonthName(item.month)})`; // If grouped by month
+            }
+            if (item.year){ 
+                return item.year.toString(); // If grouped by year
+            }else{
+                return item.name; 
+            }
+        });
+       
       const values = data.map(item => item.totalQtySold);
       
       const chart = new Chart(ctx, {
@@ -451,6 +399,12 @@
         legendContainer.appendChild(legendItem);
       });
     }
+
+    // Function to Convert Month Number to Month Name
+function getMonthName(monthNumber) {
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return monthNames[monthNumber - 1]; // Months are 1-indexed in MongoDB but 0-indexed in JavaScript arrays
+}
 </script>
 
 

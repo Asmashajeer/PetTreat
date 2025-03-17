@@ -1,48 +1,65 @@
 <%- include("../../views/partials/admin/header") %>
-
+<style>
+    .bg-pastelBlue{
+        background-color: #ADD8E6;
+    }
+    .bg-pastelGreen{
+        background-color: #90EE90;
+    }
+    .bg-pastelYellow{
+        background-color: #FFFFE0;
+    }
+    .bg-pastelRed{
+        background-color: #FFDAB9;
+    }
+    .bg-pastelPink{
+        background-color: #fa3008;
+    }
+</style>
     
     <!-- Main Content -->
-    <div class="container-fluid mt-4">
-        <div class="row mb-4">
-            <div class="col">
+    <div class="container-fluid mt-2 bg-custom">
+        <div class="row mb-4 mt-2">
+            <div class="col text-center">
                 <h4>Order Management</h4>
             </div>
         </div>
 
         <!-- Stats Cards -->
         <div class="row mb-4">
-            <div class="col-md-3 mb-3">
-                <div class="card bg-primary text-white">
+            <div class="col-md-2 mb-3">
+                <div class="card bg-pastelBlue ">
                     <div class="card-body">
                         <h6 class="card-title">Total Orders</h6>
-                        <h3 class="card-text"></h3>
+                        <h5 class="card-text"><%=totalOrderStatus.totalOrders%></h5>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="card bg-success text-white">
+            <div class="col-md-2 mb-3">
+                <div class="card bg-pastelGreen ">
                     <div class="card-body">
                         <h6 class="card-title">Completed</h6>
-                        <h3 class="card-text"></h3>
+                        <h5 class="card-text"><%=totalOrderStatus.totalOrderCompleted%></h5>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="card bg-warning text-dark">
+            <div class="col-md-2 mb-3">
+                <div class="card bg-pastelYellow">
                     <div class="card-body">
                         <h6 class="card-title">Pending</h6>
-                        <h3 class="card-text"></h3>
+                        <h5 class="card-text"><%=totalOrderStatus.totalOrderPending%></h5>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="card bg-danger text-white">
+            <div class="col-md-2 mb-3">
+                <div class="card bg-pastelRed ">
                     <div class="card-body">
                         <h6 class="card-title">Cancelled</h6>
-                        <h3 class="card-text"></h3>
+                        <h5 class="card-text"><%=totalOrderStatus.totalOrderCancelled%></h5>
                     </div>
                 </div>
             </div>
+            
         </div>
 
         <!-- Search and Filter -->
@@ -57,102 +74,53 @@
                     </div>
                 </form>
             </div>
-            <div class="col-md-6 text-md-end">
-                <button class="btn btn-success">
-                    <i class="fas fa-plus"></i> New Order
-                </button>
-                <button class="btn btn-secondary"  data-bs-toggle="modal" data-bs-target="#filterModal">
-                    <i class="fas fa-filter"></i> Filter
-                </button>
-            </div>
-            <!-- ----------filter -->
-            <div class="modal fade" id="filterModal" tabindex="-1">
-                <div class="modal-dialog modal-md">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Filter Orders</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form id="filterForm" action="/admin/orders" method="GET">
-                                <!-- Date Range -->
-                                <div class="filter-section d-flex align-items-center border-bottom justify-content-between mb-3">
-                                    <span class="mb-3">Date Range</span>                                    
-                                        <div class="col-md-4 w-25  d-flex align-items-center ">
-                                            <label class="form-label ">From  </label>
-                                            <input type="date" class="form-control" name="dateFrom" value="">
-                                        </div>
-                                        <div class="col-md-4 w-25 d-flex align-items-center ">
-                                            <label class="form-label m1-2">To </label>
-                                            <input type="date" class="form-control" name="dateTo" value="">
-                                        </div>                                  
-                                </div>
-                              <br>
-                                <!-- Order Status -->
-                                <div class="filter-section mb-1">
-                                    <h6 class="mb-3">Order Status</h6>
-                                    <div class="status-filters d-flex align-items-center justify-content-between m-0">
-                                        <div class="form-check d-flex ">
-                                            <input class="form-check-input" type="checkbox" name="status" value="Placed" id="statusPlaced">
-                                            <label class="form-check-label" for="statusPlaced">
-                                                Placed
-                                            </label>
-                                        </div>
-                                        <div class="form-check  d-flex">
-                                            <input class="form-check-input" type="checkbox" name="status" value="Processing" id="statusProcessing">
-                                            <label class="form-check-label" for="statusProcessing">
-                                                Processing
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="status" value="Shipped" id="statusCompleted">
-                                            <label class="form-check-label" for="statusShipped">
-                                               Shipped
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="status" value="Cancelled" id="statusCancelled">
-                                            <label class="form-check-label" for="statusCancelled">
-                                                Cancelled
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="status" value="CancelRequested" id="statusCancelRequested">
-                                            <label class="form-check-label" for="statusCancelRequested">
-                                                CancelRequested
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <br>
-                                <!-- Price Range -->
-                                <div class="filter-section  ">
-                                    <h6 class="mb-3 mt-2 ">Price Range</h6>
-                                    <div class="row ms-5 price-range">
-                                        <div class="col-md-4">
-                                            <label class="form-label">Min Price</label>
-                                            <input type="number" class="form-control" name="minPrice" placeholder="0">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label">Max Price</label>
-                                            <input type="number" class="form-control" name="maxPrice" placeholder="0">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" onclick=" clearAll()" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" form="filterForm" class="btn btn-apply">
-                                        <i class="fas fa-check me-2"></i>Apply Filters
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                        
-                    </div>
+        </div>
+
+        <!-- filter -->            
+        <div class=" row card mx-1 my-0 shadow-sm">            
+            <div class="card-body">
+                <form class="row g-3" id="filterForm"  action="/admin/orders" method="GET">
+                <div class="col-md-2">
+                    <label for="dateFrom" class="form-label">Date From</label>
+                    <input type="date" class="form-control" id="dateFrom" name="dateFrom">
                 </div>
+                <div class="col-md-2">
+                    <label for="dateTo" class="form-label">Date To</label>
+                    <input type="date" class="form-control" id="dateTo" name="dateTo">
+                </div>
+                <div class="col-md-2">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                    <option value="">All</option>
+                    <option value="Placed">Placed</option>
+                    <option value="Processing">Processing</option> 
+                    <option value="shipped">shipped</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Return Request">Return Request</option>
+                    <option value="Returned">Returned</option> 
+                    <option value="Cancelled">Cancelled</option>           
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="minPrice" class="form-label">Price From</label>
+                    <input type="number" class="form-control" id="minPrice" name="minPrice">
+                </div>
+                <div class="col-md-2">
+                    <label for="maxPrice" class="form-label">Price To</label>
+                    <input type="number" class="form-control" id="maxPrice" name="maxPrice">
+                </div>
+                
+                <div class="col-md-1 d-flex align-items-end">
+                    
+                    <button type="submit" class="btn btn-sm btn-primary p-2 mx-1 ">Apply</button>
+                    <button type="reset" id="reset" class="btn btn-sm btn-outline-secondary  p-2 " onclick="resetToDeafault(event);">Reset</button>
+                    
+                </div>
+                </form>
             </div>
         </div>
-       <!-- -----------filter ends -->
+       
+          
         <!-- Orders Table -->
         <div class="card">
             <div class="card-body">
@@ -195,41 +163,26 @@
                                     <!-- <a href="/admin/orders/cancelOrde/<%=order.orderId%>"  onclick="return confirm('Are you sure,Do you want  to cancel this Order ? ')" class="btn btn-sm border"><i class="fas fa-trash text-danger"></i></a> -->
                                 </td>
                             </tr>
-                        <%})%>    
-                           
+                        <%})%>                               
                         </tbody>
                     </table>
                 </div>
 
                 <!-- Pagination -->
-                <nav>                 
-                    <ul class="pagination justify-content-center">
-                            <%if (currentPage>1){%>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=<%= currentPage-1 %>"  aria-label="Previous">
-                                        <span aria-hidden="true">&laquo;</span>
-                                    </a>
-                                </li>                    
-                            <%}%>
-                             <%for(let i=1;i<=totalPages;i++){%> 
-                             
-                                <%if(i==currentPage){%>
-                                    <li class="page-item">   
-                                      <span  class="page-link " href=""><%= i %></span></a> 
-                                <%}else{%>
-                                    <li class="page-item" >
-                                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-                                    </li>
-                            <%}}%>
-                            <%if (currentPage<totalPages){%>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=<%= currentPage+1 %>" aria-label="Next">
-                                        <span aria-hidden="true">&raquo;</span>
-                                    </a>
-                                </li>
-                            <% }%>       
-                     </ul>
-                </nav>
+                <div class="pagination d-flex justify-content-center pb-2">
+                    <%if (currentPage>1){%>
+                        <a href="?page=<%= currentPage-1 %>">&laquo;</a>
+                    <%}%>
+                     <%for(let i=1;i<=totalPages;i++){%> 
+                        <%if(i==currentPage){%>
+                            <span  class="current-page bg-custom "><%= i %></span>
+                        <%}else{%>
+                            <a href="?page=<%= i %>"><%= i %></a>
+                    <%}}%>
+                    <%if (currentPage<totalPages){%>
+                        <a href="?page=<%= currentPage+1 %>"> &raquo; </a>
+                    <% }%>      
+                </div>
             </div>
         </div>
     </div>
@@ -237,33 +190,7 @@
     <script>
 
         document.getElementById('DOMContentLoaded',function(){
-            document.getElementById('dateFrom').value='';
-            document.getElementById('dateTo').value='';
-      
-            document.getElementById('filterForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(this);
-                let queryParams = new URLSearchParams();
-                
-                // Add date range if specified
-                if(formData.get('dateFrom')) queryParams.append('dateFrom', formData.get('dateFrom'));
-                if(formData.get('dateTo')) queryParams.append('dateTo', formData.get('dateTo'));
-                
-                // Add selected statuses
-                const statuses = formData.getAll('status');
-                if(statuses.length) queryParams.append('status', statuses.join(','));
-                
-                // Add price range if specified
-                if(formData.get('minPrice')) queryParams.append('minPrice', formData.get('minPrice'));
-                if(formData.get('maxPrice')) queryParams.append('maxPrice', formData.get('maxPrice'));
-                
-
-                document.getElementById('dateFrom').value='';
-                document.getElementById('dateTo').value='';
-                // Redirect with filters
-                window.location.href = `/admin/orders?${queryParams.toString()}`;
-            });
+           
 
             function clearAll(){
                 document.getElementById('filterForm').reset();

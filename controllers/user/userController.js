@@ -6,7 +6,7 @@ const Address= require('../../models/addressSchema');
 const Wallet = require('../../models/walletSchema');
 const Wishlist = require('../../models/wishlistSchema');
 const ReferralOffer= require('../../models/referralOfferSchema');
-
+const {addTransaction}=require('../../helpers/utils');
 const nodemailer =require('nodemailer');
 const env =require('dotenv').config();
 const bcrypt= require('bcrypt');
@@ -26,7 +26,7 @@ async function addRewards(referralcode,userId){
     let transaction={
         transactionType:'Credit',      
         amount:reward.refererAmount,
-        description:`For Referring the user - ${user}` 
+        description:`Referral reward credited for referring User - ${user}` 
     };
     //-----add reward to referer
     const refererReward= await Wallet.updateOne(
@@ -36,7 +36,9 @@ async function addRewards(referralcode,userId){
             $inc:{walletAmount:reward.refererAmount}
         },{ upsert: true });
     console.log(refererReward);
+
     
+    addTransaction(refererReward._id,findReferer._id,'Credit',transaction.amount, 'Referal',transaction.description);
     if(!refererReward){
         console.log('Error:reward cannot add to referrer'); 
     }
@@ -45,7 +47,7 @@ async function addRewards(referralcode,userId){
     let transactions={
         transactionType:'Credit',      
         amount:reward.refereeAmount,
-        description:`Refered by  - ${findReferer.name}`
+        description:`Referral reward credited for signing up with referral`
     };
 
     const refereeReward=new Wallet({
@@ -53,7 +55,9 @@ async function addRewards(referralcode,userId){
         transactions,
         walletAmount:reward.refereeAmount
     })
-    await refereeReward.save();    
+    await refereeReward.save(); 
+    
+    addTransaction(refereeReward._id,userId,'Credit',transaction.amount, 'Referal',transaction.description);   
     console.log('reward added to referreee'); 
 }
 
@@ -109,7 +113,7 @@ const loadHomePage =async (req,res)=>{
         const user=req.session.user;
         let cartSize=0;
         let wList=0;
-
+       
         if(user){
                 const userData= await User.findOne({_id:user})
                 const cart= await Cart.findOne({userId:userData._id});

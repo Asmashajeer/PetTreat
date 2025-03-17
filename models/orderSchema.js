@@ -110,7 +110,7 @@ const orderSchema = new Schema({
   },
   shippingDate:{
     type:Date
-  }, 
+  },   
   coupon:{
     type:String,
     default:null

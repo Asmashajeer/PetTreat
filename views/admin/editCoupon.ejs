@@ -6,7 +6,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header custom-header">
-                        <h3 class="text-center mb-0">Edit Coupon</h3>
+                        <h5 class="text-center mb-0">Edit Coupon</h5>
                     </div>
                     <div class="card-body">
                         <form id="editCouponForm" action="/admin/updateCoupon/<%=coupon._id%>" method="post">
@@ -17,29 +17,29 @@
                                   <%=message%>
                                 </div>
                                 <%}%>
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 <label for="couponCode" class="form-label">Coupon Code</label>
                                 <input type="text" class="form-control" name="couponCode" id="couponCode"  value="<%=coupon.couponCode%>" required>
                             </div>
                             
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 <label for="createdOn" class="form-label">Created On</label>
-                                <input type="date" class="form-control" name="createdOn" id="createdOn" value="<%= new Date(coupon.createdOn).toISOString().split('T')[0] %>" required>
+                                <input type="date" class="form-control" name="startOn" id="startOn" value="<%= new Date(coupon.startOn).toISOString().split('T')[0] %>" required>
                                 <div id="error-create-date" class="error-message"></div>
                             </div>
                             
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 <label for="expireOn" class="form-label">Expire On</label>
                                 <input type="date" class="form-control"  name="expireOn" id="expireOn" value="<%= new Date(coupon.expireOn).toISOString().split('T')[0] %>" required>
                                 <div id="error-expire-date" class="error-message"></div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="discountValue" class="form-label">Discount Value (%)</label>
+                            <div class="mb-2">
+                                <label for="discountValue" class="form-label">Discount Value</label>
                                 <input type="number" class="form-control" name="discountValue" id="discountValue" value="<%=coupon.discountValue%>" min="0" max="1000" required>
                             </div>
                             
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 <label for="minimumPrice" class="form-label">Minimum Price</label>
                                 <input type="number" class="form-control" name="minimumPrice" id="minimumPrice"  value="<%=coupon.minimumPrice%>" min="0" step="0.01" required>
                             </div>

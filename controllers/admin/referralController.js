@@ -11,11 +11,11 @@ const referralOfferPage = async(req,res)=>{
 }
 
 const addReferralOffer= async (req,res)=>{
-    const {refererAmount,refereeAmount,minimumAmount}=req.body;
+    const {refererAmount,refereeAmount}=req.body;
     const refOffer=   new ReferralOffer({
         refererAmount:parseInt(refererAmount),
         refereeAmount:parseInt(refereeAmount),
-        minimumAmount:parseInt(minimumAmount)
+        
     });
     await refOffer.save();
     return res.redirect('/admin//referralOffer');

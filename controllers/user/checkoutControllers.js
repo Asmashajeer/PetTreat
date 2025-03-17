@@ -5,7 +5,9 @@ const Address=require('../../models/addressSchema');
 const Coupon = require('../../models/couponSchema');
 const Wallet =require('../../models/walletSchema');
 const ReferralOffer =require('../../models/referralOfferSchema');
-const Referral =require('../../models/referralSchema');
+const Ledger= require('../../models/ledgerSchema');
+
+
 
 const loadCheckoutPage = async (req, res) => {
     try {
@@ -67,7 +69,7 @@ const loadCheckoutPage = async (req, res) => {
         if(req.session.coupon){           
                 discount=req.session.coupon.discount;            
         }        
-        res.render("checkout", { userData,addressData,orderItems,totalPrice,discount,coupons,deliveryPrice,cartSize:req.session.cartSize,wList:req.session.wList});
+        res.render("checkout", { user:userData,addressData,orderItems,totalPrice,discount,coupons,deliveryPrice,cartSize:req.session.cartSize,wList:req.session.wList});
        // res.render("checkout", { userData,addressData,cart:mycart,discount,coupons,deliveryFee });
         console.log(" checkout loaded");
     } catch (error) {

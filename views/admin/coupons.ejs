@@ -1,14 +1,14 @@
 <%- include("../../views/partials/admin/header") %>
 </head>
 <body  onload="setDefaultCreatedDate()">
-    <div class="container-fluid mt-5">
+    <div class="container-fluid mt-2 bg-custom">
         <div class="row">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header bg-transperant p-2 ">
+            <div class="col-md-4 ">
+                <div class="card shadow">
+                    <div class="card-header bg-transperant shadow p-2 ">
                         <h6 class="text-center mb-0">Create Coupon</h6>
-                    </div>
-                    <div class="card-body">
+                    </div> 
+                    <div class="card-body ">
                         <form id="couponForm" action ='/admin/createCoupon/' method="post">
                             <%if(locals.message && message.length>0){%>
                                 <div class="alert alert-danger text-center">
@@ -50,8 +50,8 @@
             </div>
             
             <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header bg-transperant ">
+                <div class="card shadow">
+                    <div class="card-header bg-transperant shadow ">
                         <h5 class="text-center mb-0">Available Coupons</h5>
                     </div>
                     <div class="card-body">
@@ -89,34 +89,20 @@
                                 </tbody>
                             </table>
                             <!-- Pagination -->
-                            <nav>
-                                <ul class="pagination">
-                                    <%if (currentPage>1){%>
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=<%= currentPage-1 %>"  aria-label="Previous">
-                                                <span aria-hidden="true">&laquo;</span>
-                                            </a>
-                                        </li>                    
-                                    <%}%>
-                                    <%for(let i=1;i<=totalPages;i++){%> 
-                                    
-                                        <%if(i==currentPage){%>
-                                            <li class="page-item">   
-                                            <span  class="page-link " href=""><%= i %></span></a> 
-                                        <%}else{%>
-                                            <li class="page-item" >
-                                                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-                                            </li>
-                                    <%}}%>
-                                    <%if (currentPage<totalPages){%>
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=<%= currentPage+1 %>" aria-label="Next">
-                                                <span aria-hidden="true">&raquo;</span>
-                                            </a>
-                                        </li>
-                                    <% }%>       
-                                </ul>
-                            </nav>
+                            <div class="pagination d-flex justify-content-center pb-2">
+                                <%if (currentPage>1){%>
+                                    <a href="?page=<%= currentPage-1 %>">&laquo;</a>
+                                <%}%>
+                                 <%for(let i=1;i<=totalPages;i++){%> 
+                                    <%if(i==currentPage){%>
+                                        <span  class="current-page bg-custom "><%= i %></span>
+                                    <%}else{%>
+                                        <a href="?page=<%= i %>"><%= i %></a>
+                                <%}}%>
+                                <%if (currentPage<totalPages){%>
+                                    <a href="?page=<%= currentPage+1 %>"> &raquo; </a>
+                                <% }%>      
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -26,7 +26,33 @@ const generateReport= async (req, res) => {
            endDate= new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 1)) // Next day start (excludes next day data)
         }
         let salesReport;
-       if(reportType==='daily' ||reportType===''){   //------------------------Daily Report------------
+        if(reportType===''){
+            // const dailyReport=await Order.find({createdOn:{ $gte: new Date(startDate), $lt:new Date(endDate) },
+            //         paymentStatus:'Paid'},{createdOn:1,orderPrice:1});
+            const todayReport=await Order.aggregate([
+                {
+                    $match: {
+                        createdOn:{ $gte: new Date(startDate), $lt:new Date(endDate) },
+                        paymentStatus:'Paid'
+                    }
+                },
+                {
+                    $group: {
+                        _id: { $dateToString: { format: "%Y-%m-%d (%H:%M:%S)",date: "$createdOn" } },
+                        noOfOrders: { $sum: 1 },
+                        totalSale: { $sum: "$orderPrice" },
+                        avgSalesValue:{$avg:"$orderPrice"},
+                        totalDiscount:{$sum:"$discount"},                    
+                    }
+                }
+            ]);
+            todayReport.forEach(entry => {
+                entry.period = entry._id;
+            });
+                salesReport=todayReport;
+        }
+       if(reportType==='daily'){   //------------------------Daily Report------------
+        
             const dailyReport=await Order.aggregate([
                 {
                     $match: {

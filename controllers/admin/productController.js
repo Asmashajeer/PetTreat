@@ -87,16 +87,16 @@ const addProduct=async(req,res)=>{
      try {        
             const productData= await Product.find({
                 $or:[
-                    {productName:{$regex:'.*'+search+'.*'}},
-                    {brand:{$regex:'.*'+search+'.*'}}                    
+                    {productName:{$regex:'.*'+search+'.*', $options: 'i'}},
+                    {brand:{$regex:'.*'+search+'.*', $options: 'i'}}                    
                 ],
             }).sort({createdAt:-1}).skip(skip).limit(limit*1).populate('category').exec();
                       
 
             const count= await Product.find({
                 $or:[
-                    {productName:{$regex:'.*'+search+'.*'}},
-                    {brand:{$regex:'.*'+search+'.*'}}                    
+                    {productName:{$regex:'.*'+search+'.*', $options: 'i'}},
+                    {brand:{$regex:'.*'+search+'.*', $options: 'i'}}                    
                 ],
             }).countDocuments();    
         
@@ -205,15 +205,16 @@ const updateProduct=async (req,res)=>{
 
         if (req.files && req.files.length > 0) {
             const newImages = req.files.map(file => file.filename);
-
+            console.log(newImages);
             if(product.productImages.length<3){
                 await Product.findByIdAndUpdate(id, {
                     $push: { productImages: { $each:newImages } } // ✅ Append new images
                 }, { new: true });
             }else{
-                product.productImages[product.productImages.length-1]=newImages;
+                product.productImages[0]=newImages[0];
+                product.save();
             }   
-        // updates.productImages = productImages; // Replace the old images
+            // updates.productImages = newImages; // Replace the old images
         }
               
         const updatedProduct = await Product.findByIdAndUpdate(id, updates, { new: true });

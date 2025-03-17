@@ -2,11 +2,11 @@
 
 
 <body class="bg-light" >
-    <div class="container py-4 "  id="salesReportData">
+    <div class="container py-4 bg-custom "  id="salesReportData">
         <!-- Header -->
         <div class="row mb-4">
-            <div class="col">
-                <h2>Sales Report</h2>
+            <div class="col text-center">
+                <h4>Sales Report</h4>
             </div>
         </div>
 
@@ -47,7 +47,7 @@
                                
                         </div> -->
                         <div class="col-md-2">
-                            <button type="submit" class="btnbtn-sm  btn-primary w-100">
+                            <button type="submit" class="btnbtn-sm  bg-custom w-100">
                                 <i class="fas fa-sync-alt me-2"></i>Generate
                             </button>
                         </div>
@@ -217,11 +217,12 @@ document.getElementById("exportPDF").addEventListener("click", function () {
     let rows = [];
 
     // Extract table data from HTML
-    document.querySelectorAll("#salesReport tbody tr, #salesReport tfoot tr").forEach(row => {
+    document.querySelectorAll("#salesReport tbody tr,#salesReport tfoot tr").forEach(row => {
         let rowData = Array.from(row.children).map(cell => cell.innerText);
         rows.push(rowData);
     });
-
+    
+     let footer=rows.length-1;
     // Add table to PDF
     doc.autoTable({
         startY: 20, // Position below title
@@ -230,7 +231,13 @@ document.getElementById("exportPDF").addEventListener("click", function () {
         theme: "grid", // Adds table borders
         styles: { fontSize: 10 }, // Adjust font size
         headStyles: { fillColor: [22, 160, 133] }, // Header color (teal)
-        margin: { top: 20 }
+        margin: { top: 20 },
+        didParseCell: function (data) {
+        if (data.row.index === footer) {
+            data.cell.styles.fontStyle = 'bold'; // Make footer bold
+        }
+    }
+
     });
 
     // Save and download PDF

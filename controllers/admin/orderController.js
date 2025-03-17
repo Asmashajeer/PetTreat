@@ -5,13 +5,14 @@ const Cart = require('../../models/cartSchema');
 const User=require('../../models/userSchema');
 const Address = require('../../models/addressSchema');
 const Wallet = require('../../models/walletSchema');
-
+const {addTransaction}=require('../../helpers/utils');
+const moment = require('moment');
 
 //---------list orders------------------------------
 
 const loadOrders=async(req,res)=>{
     try {    
-
+        console.log(req.query);
             let page=1;
             if(req.query.page){
                 page=req.query.page;            
@@ -39,7 +40,7 @@ const loadOrders=async(req,res)=>{
 
             // ------------- filter -Date-, -status-,-price-,
             if (req.query.status) {
-                query.status = { $in: req.query.status.split(',') };
+                query.status = req.query.status;
             }
 
             // Price filter
@@ -92,8 +93,19 @@ const loadOrders=async(req,res)=>{
             console.log("no order found");
             res.render('orders',{message:"No order"});
         }
-      
-        res.render('orders',{orders:orderData,totalPages:Math.ceil(count/limit),currentPage:page});
+      const totalOrders= await Order.find().countDocuments();
+                  const totalOrderCompleted= await  Order.find().countDocuments({status:'Delivered'});
+                  const totalOrderCancelled= await  Order.find().countDocuments({status:'Cancelled'});
+                  const totalOrderPending = await Order.countDocuments({
+                      status: { $nin: ['Delivered', 'Returned', 'Cancelled'] }});  
+                 
+        const totalOrderStatus={
+            totalOrders,
+            totalOrderCompleted,
+            totalOrderPending ,
+            totalOrderCancelled
+        }
+        res.render('orders',{orders:orderData,totalOrderStatus,totalPages:Math.ceil(count/limit),currentPage:page});
     } catch (error) {
         console.error("server error",error);
         res.status(500).redirect('/pageError');
@@ -119,7 +131,7 @@ const viewOrder =async(req,res)=>{
                 orderAddress=address;
             }
         })
-        res.render('changeOrderStatus',{order:singleOrder,address:orderAddress,statusValues:orderStatusValues});
+        res.render('changeOrderStatus',{order:singleOrder,address:orderAddress,statusValues:orderStatusValues,moment});
     } catch (error) {
         console.log("error fetching Order Details:",error);
         res.redirect("/pageError");
@@ -132,40 +144,63 @@ const changeOrderStatus =async (req,res)=>{
         const orderId=req.params.id;
         const {changedStatus}= req.body;
         console.log(changedStatus,orderId);
+        //----------------------cancel An Order  by admin-----
         if(changedStatus==='Cancelled'){
             const orderData= await Order.findOne({orderId:orderId});
             if(!orderData){
                 console.log("order not found");
                 res.redirect(`/admin/orders/changeOrderStatus/${orderId}`);
             }
+
             for(let item of orderData.orderItems){
                 console.log(item.quantity)
-               updated= await Product.findByIdAndUpdate(item.product,{$inc:{quantity:item.quantity}}, { new: true });            
-           }           
-        }    
-        if(changedStatus==='Delivered'){
-            const orderData= await Order.findOneAndUpdate({orderId:orderId}, { $set: { status: changedStatus,paymentStatus:'Paid'} },{new:true});
-        if(!orderData){
-            console.log("order Status not changed!");
-            return res.json({success:false,message:"order Status not updated!"})
-        } 
-        }
-        const orderData= await Order.findOneAndUpdate({orderId:orderId}, { $set: { status: changedStatus } },{new:true});
-        if(!orderData){
-            console.log("order Status not changed!");
-            return res.json({success:false,message:"order Status not updated!"})
-        } 
-      
-        const orderStatusValues = Order.schema.path("status").enumValues;   
-      
-        console.log(orderStatusValues);
+                updated= await Product.findBydAndUpdate(item.product,{$inc:{quantity:item.quantity}}, { new: true });  //add cancelled quantity to stock
+            } 
+            // refund for paid user to wallet        
+            if(orderData.paymentStatus==='Paid'){
+                let transaction={
+                    transactionType:'Credit',      
+                    amount:orderData.orderPrice,
+                    description:`cancelled an order by Admin`,
+                    orderId
+                };
+                //-----add  to wallet
+                const updatedWallet= await Wallet.updateOne(
+                    {userId:orderData.userId},
+                    {
+                        $push:{transactions:transaction},
+                        $inc:{walletAmount:orderData.orderPrice}
+                    },{ upsert: true });
 
-        res.status(200).json({success:true,changedStatus:changedStatus,statusvalues:orderStatusValues});
+                console.log( updatedWallet);
+                addTransaction(orderId,orderData.userId,'Credit',transaction.amount, 'Refund',transaction.description);    
+                
+            }         
+        }    
+        else if(changedStatus==='Delivered'){
+            if(orderData.paymentStatus!=='paid'){
+                orderData= await Order.findOneAndUpdate({orderId:orderId}, { $set: { status: changedStatus,paymentStatus:'Paid',deliveryDate:Date.now(),paymentDate:Date.now()} },{new:true});
+                return res.status(200).json({success:true,changedStatus:changedStatus});
+            }else{
+                orderData= await Order.findOneAndUpdate({orderId:orderId}, { $set: { status: changedStatus,deliveryDate:Date.now()} },{new:true});
+                return res.status(200).json({success:true,changedStatus:changedStatus});
+            }
+        }    
+        
+        if(changedStatus==='Shipped'){
+            orderData= await Order.findOneAndUpdate({orderId:orderId}, { $set: { status: changedStatus,shippingDate:Date.now()} },{new:true});
+                return res.status(200).json({success:true,changedStatus:changedStatus});
+        }   
+        orderData= await Order.findOneAndUpdate({orderId:orderId}, { $set: { status: changedStatus } },{new:true});
+        if(!orderData){
+            console.log("order Status not changed!");
+            return res.json({success:false,message:"order Status not updated!"})
+        }    
+        res.status(200).json({success:true,changedStatus:changedStatus});
         console.log(`order Status  changed to  ! ${changedStatus}`);
     } catch (error) {
-        console.log("Error:cannot change status");
-        
-
+        console.log("Error:cannot change status",error);
+        res.status(400).json({success:false,message:'cannot change status'});
     }
 }
 //-----------------management Return-------------------
@@ -193,7 +228,7 @@ const updateReturn =async(req,res)=>{
         if (action === "reject") {
             let  updatedOrder= await Order.updateOne(
                 { orderId: orderId, status: "Delivered", "orderItems.product": productId, "orderItems.returnStatus": "Return Request" },
-                { $set: { "orderItems.$.returnStatus": "Return Rejected" } });            
+                { $set: { "orderItems.$.returnStatus": "Return Rejected"} });            
                 if(!updatedOrder.modifiedCount>0){
                     console.log('Cannot Accept tthe return request ');
                      return res.json({success:false,message:"Cannot Accept tthe return request"});
@@ -202,11 +237,16 @@ const updateReturn =async(req,res)=>{
         }
        
         if (action === "accept") {
-           
-            let  updatedOrder= await Order.updateOne(
+            if(order.orderItems.length===1){
+                  updatedOrder= await Order.updateOne(
+                    { orderId: orderId, status: "Delivered", "orderItems.product": productId, "orderItems.returnStatus": "Return Request" },
+                    { $set: { "orderItems.$.returnStatus": "Return Approved",status:'Returned' } });
+            }else{
+                  updatedOrder= await Order.updateOne(
                 { orderId: orderId, status: "Delivered", "orderItems.product": productId, "orderItems.returnStatus": "Return Request" },
                 { $set: { "orderItems.$.returnStatus": "Return Approved" } }
             );
+            }
             if(!updatedOrder.modifiedCount>0){
                 console.log('Cannot Accept tthe return request ');
                  return res.json({success:false,message:"Cannot Accept tthe return request"});
@@ -222,7 +262,8 @@ const updateReturn =async(req,res)=>{
                 let transaction={
                     transactionType:'Credit',      
                     amount:totalReturnPrice,
-                    description:'Return an item from Order'
+                    description:`Return an item from Order`,
+                    orderId
                 };
                 //-----add  to wallet
                 const updatedWallet= await Wallet.updateOne(
@@ -233,6 +274,7 @@ const updateReturn =async(req,res)=>{
                     },{ upsert: true });
 
                 console.log( updatedWallet);
+                addTransaction(orderId,userId,'Credit',transaction.amount, 'Refund',transaction.description);    
                 return res.status(200).json({success:true,message:'Accepted'});  
             }
         } 

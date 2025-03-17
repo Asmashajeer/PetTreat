@@ -11,7 +11,7 @@ const checkoutController=require('../../controllers/user/checkoutControllers');
 const orderController= require('../../controllers/user/orderController');
 const wishlistController= require('../../controllers/user/wishlistController');
 const walletConttroller= require('../../controllers/user/walletController');
-
+const aboutController= require('../../controllers/user/aboutController');
 //-----------------home Route-------------------
 router.get('/',userController.loadHomePage);     //home page
 router.get('/pageNotFound',userController.pageNotFound);    //page notFound
@@ -108,7 +108,7 @@ router.get('/orders/cancelOrder/:id',userAuth,orderController.cancelOrder);
 router.get('/orders/trackorder/:id',userAuth,orderController.trackOrder);
 router.get('/orders/returnAnItemRequest/:orderId/:productId/:productName/:quantity/:price',userAuth,orderController.returnOrderRequestPage);
 router.post('/orders/returnRequest',userAuth,orderController.returnOrderRequest);
-router.put('/order/returnAnOrder',userAuth,orderController.returnAnOrder);
+
 router.get('/order/invoice/:id',userAuth,orderController.invoice);
 router.get("/orders/downloadInvoice/:orderId",userAuth,orderController. generatePDFInvoice);
 
@@ -122,12 +122,10 @@ router.put('/wallet/topUp',userAuth,walletConttroller.topUp);
 router.post('/wallet/payment/verify',userAuth,walletConttroller.verifyPayment);
 
 
+//------------aboutus and contact----------
 
-
-
-
-
-
+router.get('/about',aboutController.aboutUs);
+router.get('/contactUs',aboutController.contactUs);
 
 
 

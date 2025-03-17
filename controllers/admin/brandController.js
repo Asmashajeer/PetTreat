@@ -28,8 +28,8 @@ const  getBrand= async(req,res)=>{
 //----------------add new Brand-------------
 const addBrand =async(req,res)=>{
     try {
-            const brand=req.body.name;
-            const findBrand=await Brand.findOne({brand});
+            const brand=req.body.name.trim();
+            const findBrand=await Brand.findOne({ brand: { $regex: '^' + brand + '$', $options: 'i' }});
             if(!findBrand){
                 const image=req.file.filename;
                
@@ -46,6 +46,9 @@ const addBrand =async(req,res)=>{
                 }
                        
 
+            }else{
+                console.log("This brand Already exist");
+                return res.status(400).redirect('/admin/brands');
             }
     } catch (error) {
         res.redirect('/admin/pageError');
